@@ -1,5 +1,7 @@
-pip install wheel
-pip install jupytext --upgrade
+#pip install wheel
+#pip install jupytext --upgrade
+
+git config --global core.editor "nano"
 
 jupyter notebook --generate-config -y
 echo 'c.NotebookApp.contents_manager_class = "jupytext.TextFileContentsManager"' >> ~/.jupyter/jupyter_notebook_config.py
