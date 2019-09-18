@@ -2,7 +2,7 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,md
+#     formats: ipynb,py
 #     text_representation:
 #       extension: .py
 #       format_name: light
@@ -276,15 +276,19 @@ surnames.value_counts()
 
 # **Exercise 1.** How many people were in the largest party served by the waiter? The smallest?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+## BEGIN SOLUTION
+tips = pd.read_csv("/data301/data/tips.csv")
+tips.describe()
+## END SOLUTION
 
 # **Exercise 2.** How could you use the `.quantile()` function to calculate the median? Check that your method works on an appropriate variable from the Tips data set.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+## BEGIN SOLUTION
+print(tips["total_bill"].quantile(.5))
+print(tips["total_bill"].median())
+## END SOLUTION
 
 # **Exercise 3.** Another measure of spread is the **interquartile range**, or IQR, defined as:
 #
@@ -292,9 +296,10 @@ surnames.value_counts()
 #
 # Measure the spread in the total bills by reporting the IQR.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+## BEGIN SOLUTION
+tips["total_bill"].quantile(.75)-tips["total_bill"].quantile(.25)
+## END SOLUTION
 
 # **Exercise 4.** Some people use MAD to refer to the **median absolute deviation**. The median absolute deviation is the same as the mean absolute deviation, but it uses the median instead of the mean:
 #
@@ -302,11 +307,16 @@ surnames.value_counts()
 #
 # Calculate the median absolute deviation of the total bills. (The median absolute deviation is not built into Pandas, so you will have to implement it from scratch.)
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+## BEGIN SOLUTION
+(tips["total_bill"]-tips["total_bill"].median()).abs().median()
+## END SOLUTION
 
 # **Exercise 5.** Who pays the bill more often: men or women?
 
-# +
-# YOUR CODE HERE
+## YOUR CODE HERE
+## BEGIN SOLUTION
+tips.sex.describe()
+## END SOLUTION
+
+

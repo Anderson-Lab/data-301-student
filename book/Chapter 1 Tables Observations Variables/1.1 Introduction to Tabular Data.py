@@ -1,7 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,md
+#     formats: ipynb,py,md
 #     text_representation:
 #       extension: .py
 #       format_name: light
@@ -17,7 +17,7 @@
 #
 # # 1.1 Introduction to Tabular Data
 #
-# What does data look like? For most people, the first image that comes to mind is a spreadsheet, with numbers neatly arranged in a table of rows and columns. One goal of this book is to get you to think beyond tables of numbers---to recognize that the words in a book and the markers on a map are also data to be collected, processed, and analyzed. But a lot of data is still organized into tables, so it is important to know how to work with **tabular data**. In fact, most machine learning algorithms can only process data that can be roughly considered **tabular data**. Where does this show up? 
+# What does data look like? For most people, the first image that comes to mind is a spreadsheet, with numbers neatly arranged in a table of rows and columns. One goal of this book is to get you to think beyond tables of numbers---to recognize that the words in a book and the markers on a map are also data to be collected, processed, and analyzed. But a lot of data is still organized into tables, so it is important to know how to work with **tabular data**. In fact, most machine learning algorithms can only process data that can be roughly considered **tabular data**. Where does this show up?
 
 # Let's look at a tabular data set. Shown below are the first 5 rows of a data set about the passengers on the Titanic. This data set contains information about each passenger (e.g., name, sex, age), their journey (e.g., the fare they paid, their destination), and their ultimate fate (e.g., whether they survived or not, the lifeboat they were on).
 #
@@ -46,7 +46,7 @@ pd.DataFrame
 
 # To read a file from disk into a `pandas` `DataFrame`, we can use the `read_csv` function in `pandas`. The first line of code below reads the Titanic dataset into a `DataFrame` called `df`. The second line calls the `.head()` method of `DataFrame`, which returns a new `DataFrame` consisting of just the first few rows (or "head") of the original.
 
-df = pd.read_csv("~/data301/data/titanic.csv")
+df = pd.read_csv("/data301/data/titanic.csv")
 df.head()
 
 # _Jupyter Tip_: When you execute a cell in a Jupyter notebook, the result of the last line is automatically printed. To suppress this output, you can do one of two things:
@@ -72,7 +72,7 @@ df.head()
 
 # Since each row represents one passenger, it might be useful to re-index the rows by the name of the passenger. To do this, we call the `.set_index()` method of `DataFrame`, passing in the name of the column we want to use as the index. Notice how `name` now appears at the very left, and the passengers' names are all bolded. This is how you know that `name` is the index of this `DataFrame`.
 
-df.set_index("Name").head()
+df.set_index("name").head()
 
 # _Warning_: The `.set_index()` method does _not_ modify the original `DataFrame`. It returns a _new_ `DataFrame` with the specified index. To verify this, let's look at `df` again after running the above code.
 
@@ -80,7 +80,7 @@ df.head()
 
 # Nothing has changed! If you want to save the `DataFrame` with the new index, you have to explicitly assign it to a variable.
 
-df_by_name = df.set_index("Name")
+df_by_name = df.set_index("name")
 df_by_name.head()
 
 # If you do not want the modified `DataFrame` to be stored in a new variable, you can either assign the result back to itself:
@@ -170,15 +170,15 @@ df_by_name.loc["Kelly, Mr. James"]
 
 # 1\.  Use `.loc`, specifying both the rows and columns. (_Note:_ The colon `:` is Python shorthand for "all".)
 
-df.loc[:, "Age"]
+df.loc[:, "age"]
 
 # 2\. Access the column as you would a key in a `dict`.
 
-df["Age"]
+df["age"]
 
 # 3\. Access the column as an attribute of the `DataFrame`.
 
-df.Age
+df.age
 
 # Method 3 (attribute access) is the most concise. However, it does not work if the variable name contains spaces or special characters, begins with a number, or matches an existing attribute of `DataFrame`. For example, if `df` had a column called `head`, `df.head` would not return the column because `df.head` already means something else, as we have seen.
 
@@ -188,10 +188,10 @@ df.Age
 
 # +
 # METHOD 1
-df.loc[:, ["Age", "Sex"]].head()
+df.loc[:, ["age", "sex"]].head()
 
 # METHOD 2
-df[["Age", "Sex"]].head()
+df[["age", "sex"]].head()
 # -
 
 # Note that there is no way to generalize attribute access (Method 3 above) to select multiple columns.
@@ -210,23 +210,23 @@ df[["Age", "Sex"]].head()
 #
 # `pandas` tries to infer the type of each variable automatically. If every value in a column (except for missing values) can be cast to a number, then `pandas` will treat that variable as quantitative. Otherwise, the variable is treated as categorical. To see the type that Pandas inferred for a variable, simply select that variable using the methods above and look for its `dtype`. A `dtype` of `float64` or `int64` indicates that the variable is quantitative.  For example, the `age` variable above had a `dtype` of `float64`, so it is quantitative. On the other hand, if we look at the `sex` variable,
 
-df.Sex
+df.sex
 
 # its `dtype` is `object`, so `pandas` will treat it as a categorical variable. Sometimes, this check can yield surprises. For example, if you only looked the first few rows of `df`, you might expect `ticket` to be a quantitative variable. But if we actually look at its `dtype`:
 
-df.Ticket
+df.ticket
 
 # it appears to be an `object`. That is because there are some values in this column that contain non-numeric characters. For example:
 
-df.Ticket[9]
+df.ticket[9]
 
 # As long as there is one value in the column that cannot be cast to a numeric type, the entire column will be treated as categorical, and the individual values will be strings (notice the quotes around even a number like 24160, indicating that `pandas` is treating it as a string). 
 
-df.Ticket[0]
+df.ticket[0]
 
 # If you wanted `pandas` to treat this variable as quantitative, you can use the `to_numeric()` function. However, you have to specify what to do for values like `'PC 17609'` that cannot be converted to a number. The `errors="coerce"` option tells `pandas` to treat these values as missing (`NaN`).
 
-pd.to_numeric(df.Ticket, errors="coerce")
+pd.to_numeric(df.ticket, errors="coerce")
 
 # If we wanted to keep this change, we would assign this column back to the original `DataFrame`, as follows:
 #
@@ -236,11 +236,11 @@ pd.to_numeric(df.Ticket, errors="coerce")
 
 # There are also categorical variables that `pandas` infers as quantitative because the values happen to be numbers. As we discussed earlier, the `survived` variable is categorical, but the values happen to be coded as 1 or 0. To force `pandas` to treat this as a categorical variable, you can cast the values to strings. Notice how the `dtype` changes:
 
-df.Survived.astype(str)
+df.survived.astype(str)
 
 # In this case, this is a change that we actually want to keep, so we assign the modified column back to the `DataFrame`.
 
-df.Survived = df.Survived.astype(str)
+df.survived = df.survived.astype(str)
 
 # ## Summary
 #
@@ -260,18 +260,18 @@ df.Survived = df.Survived.astype(str)
 # - What type of variable is this: quantitative, categorical, or other? (_Hint:_ One useful test is to ask yourself, "Does it make sense to add up values of this variable?" If the variable can be measured on a numeric scale, then it should make sense to add up values of that variable.)
 # - Did `pandas` correctly infer the type of this variable? If not, convert this variable to the appropriate type.
 
+## YOUR CODE HERE
+## BEGIN SOLUTION
+print(df.head())
+print("data type before",df.pclass.dtype)
+df.pclass = df.pclass.astype("category")
+print("data type after",df.pclass.dtype)
+## END SOLUTION
+
 # ## YOUR TEXT HERE
 # ### BEGIN SOLUTION
 # Should be categorical but it is numeric (int64 type). We should change it to categorical.
 # ### END SOLUTION
-
-## YOUR CODE HERE
-## BEGIN SOLUTION
-print(df.head())
-print("data type before",df.Pclass.dtype)
-df.Pclass = df.Pclass.astype("category")
-print("data type after",df.Pclass.dtype)
-## END SOLUTION
 
 # Exercises 2-7 deal with the Tips data set (`/data301/data/tips.csv`). You can learn more about this data set on the first page of [this reference](http://www.ggobi.org/book/chap-data.pdf).
 
@@ -280,43 +280,94 @@ print("data type after",df.Pclass.dtype)
 # - What is the unit of observation in this data set?
 # - For each variable in the data set, identify it as quantitative, categorical, or other, based on your understanding of each variable. Did `pandas` correctly infer the type of each variable?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+## BEGIN SOLUTION
+tips = pd.read_csv("/data301/data/tips.csv")
+print(tips.head())
+print(tips.dtypes)
+## END SOLUTION
+
+# ## YOUR TEXT HERE
+# ### BEGIN SOLUTION
+# Unit of observation is a single bill or trip to the restaurant.
+#
+# total_bill: numeric, tip: numeric, size is an integer numeric, and the rest are categorical. Though arguments could be made that smoker for instance could be binary. We could also make them explicitly categorical.
+#
+# Yes. Pandas has roughly inferred the correct type.
+# ### END SOLUTION
 
 # **Exercise 3.** Make the day of the week the index of the `DataFrame`.
 #
 # - What do you think will happen when you call `tips.loc["Thur"]`? Try it. What happens?
 # - Is this a good variable to use as the index? Explain why or why not.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+## BEGIN SOLUTION
+tips = tips.set_index("day")
+print(tips.head())
+print(tips.loc["Thur"])
+## END SOLUTION
+
+# ## YOUR TEXT HERE
+# ### BEGIN SOLUTION
+# The index is reasonable depending on how you plan to study the data. Often we want our index to be unique, so in that case `day` is not appropriate.
+# ### END SOLUTION
 
 # **Exercise 4.** Make sure the index of the `DataFrame` is the default (i.e., 0, 1, 2, ...). If you changed it away from the default in the previous exercise, you can use `.reset_index()` to reset it.
 #
 # - How do you think `tips.loc[50]` and `tips.iloc[50]` will compare? Now try it. Was your prediction correct?
 # - How do you think `tips.loc[50:55]` and `tips.iloc[50:55]` will compare? Now try it. Was your prediction correct?
 
-# +
 # YOUR CODE HERE
-# -
+## BEGIN SOLUTION
+tips = tips.reset_index()
+print("loc[50]")
+print(tips.loc[50])
+print("iloc[50]")
+print(tips.iloc[50])
+print("loc[50:55]")
+print(tips.loc[50:55])
+print("iloc[50:55]")
+print(tips.iloc[50:55])
+## END SOLUTION
+
+# ## YOUR TEXT HERE
+# ### BEGIN SOLUTION
+# As you can see, there are some small differences of note for this dataset, which include the number of rows returned is one less with `iloc[50:55]`. In general, they would be really different because one is using the `index` and one is using the numerical indices.
+# ### END SOLUTION
 
 # **Exercise 5.** How do you think `tips.loc[50]` and `tips.loc[[50]]` will compare? Now try it. Was your prediction correct?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+print(tips.loc[50])
+print(tips.loc[[50]])
+print(type(tips.loc[50]),type(tips.loc[[50]]))
+### END SOLUTION
+
+# ## YOUR TEXT
+# ### BEGIN SOLUTION
+# As you can see, the biggest difference is the data type returned, which really matters for subsequent calls. Sometimes you would like the Series object and other times you want the data frame.
+# ### END SOLUTION
 
 # **Exercise 6.** What data structure is used to represent a single column, such as `tips["total_bill"]`? How could you modify this code to obtain a `DataFrame` consisting of just one column, `total_bill`?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+print(tips["total_bill"])
+print(type(tips["total_bill"]))
+print(tips[["total_bill"]])
+print(type(tips[["total_bill"]]))
+### END SOLUTION
 
 # **Exercise 7.** Create a new `DataFrame` from the Tips data that consists of just information about the table (i.e., whether or not there was a smoker, the day and time they visited the restaurant, and the size of the party), without information about the check or who paid.
 #
 # (There are many ways to do this. How many ways can you find?)
 
-# +
-# YOUR CODE HERE
+## YOUR CODE HERE
+### BEGIN SOLUTION
+print("No single solution. Open ended.")
+### END SOLUTION
+
+# ### Reflection
+# Based on your experiments with the labs this week, share something new that had not been mentioned in class such as a tidbit of information.
