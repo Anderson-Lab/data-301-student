@@ -1,5 +1,5 @@
-#pip install wheel
-#pip install jupytext --upgrade
+pip install wheel
+pip install jupytext --upgrade
 
 git config --global core.editor "nano"
 

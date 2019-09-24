@@ -1,12 +1,12 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,md
+#     formats: ipynb,py,md
 #     text_representation:
 #       extension: .py
 #       format_name: light
 #       format_version: '1.4'
-#       jupytext_version: 1.2.3
+#       jupytext_version: 1.2.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -172,44 +172,79 @@ df["Cost per Sq Ft"]
 # **Exercise 1.** What happens if you leave out a category in the dictionary that you pass to `.map()`?
 
 # +
-# ENTER YOUR CODE HERE
+## YOUR CODE HERE
+### BEGIN SOLUTION
+df = pd.read_csv(
+    "https://raw.githubusercontent.com/dlsun/data-science-book/master/data/AmesHousing.txt",
+    sep="\t")
+df["Heating QC Binary"] = df["Heating QC"].map({
+       "Gd": "Acceptable",
+       "TA": "Acceptable",
+       "Fa": "Unacceptable",
+       "Po": "Unacceptable"
+})
+
+df["Heating QC Binary"]
+### END SOLUTION
 # -
+
+# ## YOUR TEXT
+# ### BEGIN SOLUTION
+# Goes to NaN which is a missing value.
+# ### END SOLUTION
 
 # Exercises 2-4 deal with the Ames housing data set from earlier. Refer to the [data documentation](https://ww2.amstat.org/publications/jse/v19n3/decock/DataDocumentation.txt) if you have any trouble finding or understanding a variable in this data set.
 
 # **Exercise 2.** The number of bathrooms is typically reported as a decimal to allow for half bathrooms (i.e., bathrooms without a shower). In this data set, the number of full bathrooms and the number of half bathrooms are separate variables. Create a new variable with the number of bathrooms in each home.
 
-# +
-# ENTER YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+df["Bath"] = df['Full Bath']+df['Half Bath']
+### END SOLUTION
 
 # **Exercise 3.** Create a categorical variable that indicates whether or not a home has a pool.
 
-# +
-# ENTER YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+df["Pool?"] = df["Pool Area"]>0
+df["Pool?"]
+### END SOLUTION
 
-# **Exercise 4.** There are four types of utilities: electricity, gas, water, and sewage. Right now, the combination of utilities in a home is encoded in a single variable called "Utilities". Convert this variable into four boolean variables, each one indicating whether or not a home has a particular utility.
+# **Exercise 4.** Right now, the combination of utilities in a home is encoded in a single variable called "Utilities". Convert this variable into unique binary variables.
 
-# +
-# ENTER YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+df["Utilities"].value_counts()
+df["AllPub"] = df["Utilities"]=="AllPub"
+df["NoSewr"] = df["Utilities"]=="NoSewr"
+df["NoSeWa"] = df["Utilities"]=="NoSeWa"
+### END SOLUTION
 
 # Exercises 5-7 deal with the Tips data set (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv`).
 
 # **Exercise 5.** Make a visualization that shows the distribution of the total bills. Transform the variable first so that it is approximately symmetric.
 
-# +
-# ENTER YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips = pd.read_csv("/data301/data/tips.csv")
+(tips.total_bill ** .48).plot.hist()
+### END SOLUTION
 
 # **Exercise 6.** Suppose the total bill + tip are divided evenly among the people in each party. Which table paid the most _per person_?
 
-# +
-# ENTER YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+(tips.total_bill /tips["size"]).idxmax()
+### END SOLUTION
 
 # **Exercise 7.** Make a visualization that shows how busy the restaurant is by day. Your visualization should display the full name of each day, i.e., "Thursday" instead of "Thur".
 
-# +
-# ENTER YOUR CODE HERE
+## YOUR CODE HERE
+### BEGIN SOLUTION
+ax = tips.day.map({"Sat":"Saturday","Sun":"Sunday","Thur":"Thursday","Fri":"Friday"}).value_counts().plot.bar()
+### END SOLUTION
+
+# ### Reflection
+# Based on your experiments with the labs this week, share something new that had not been mentioned in class such as a tidbit of information.
+
+

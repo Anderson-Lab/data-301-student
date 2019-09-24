@@ -2,12 +2,12 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,md
+#     formats: ipynb,py,md
 #     text_representation:
 #       extension: .py
 #       format_name: light
 #       format_version: '1.4'
-#       jupytext_version: 1.2.3
+#       jupytext_version: 1.2.4
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -157,29 +157,58 @@ pclass_counts.plot.pie()
 
 # **Exercise 1.** Make a graphic that shows the distribution of total bills. Explain what you see.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+df = pd.read_csv("/data301/data/tips.csv")
+ax = df.total_bill.hist()
+ax.set_xlabel("Total Bill");
+### END SOLUTION
+
+# ## YOUR TEXT
+# ### BEGIN SOLUTION
+# Most bills are about 20 or less. Very few are above 35.
+# ### END SOLUTION
 
 # **Exercise 2.** Make a graphic that shows the number of parties this waiter served on each day of the week. Try to make sure your graphic has the days of the week in the right order, starting from Sunday.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+ax = df.day.value_counts().loc[["Sun","Thur","Fri","Sat"]].plot.bar()
+### END SOLUTION
 
 # **Exercise 3.** The `.plot.box()` command makes a box plot. A box plot is another way to visualize the distribution of a quantitative variable. Make a box plot of the total bills. Which summary statistics can you read off from this graphic? (You may want to refresh your memory about [how box plots are made](http://www.physics.csbsju.edu/stats/box2.html).)
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+df.total_bill.plot.box()
+### END SOLUTION
+
+# ## YOUR TEXT
+# ### BEGIN SOLUTION
+# Median is the line inside the box. The outer edges of the box are the quartiles. The outside horizontal lines are the min and max. The circles are the outliers.
+# ### END SOLUTION
 
 # **Exercise 4.** What happens when you call `.plot.pie()` on a quantitative variable, like `tip`? Why does the pie chart look this way? Do you think pie charts are appropriate for quantitative variables?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+df.tip.plot.pie()
+### END SOLUTION
+
+# ## YOUR TEXT
+# ### BEGIN SOLUTION
+# Looks horrible as there are too many unique values. No.
+# ### END SOLUTION
 
 # **Exercise 5.** Make a graphic that shows the distribution of party sizes served by the waiter.
 
-# +
-# YOUR CODE HERE
+## YOUR CODE HERE
+### BEGIN SOLUTION
+ax = df["size"].plot.hist()
+ax.set_xlabel("Party Size")
+### END SOLUTION
+
+# ### Reflection
+# Based on your experiments with the labs this week, share something new that had not been mentioned in class such as a tidbit of information.
+
+
