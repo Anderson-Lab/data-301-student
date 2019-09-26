@@ -1,7 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py,md
+#     formats: ipynb,md
 #     text_representation:
 #       extension: .py
 #       format_name: light
@@ -171,21 +171,27 @@ titanic_df[(titanic_df.sex == "male") & (titanic_df.survived == 1)].age.plot.his
 #
 # Use the `%timeit` magic to compare the runtimes of these two options.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+# %timeit titanic_df[titanic_df.sex == "female"].age
+# %timeit titanic_df.loc[titanic_df.sex == "female", "age"]
+### END SOLUTION
 
 # **Exercise 2.** Produce a graphic that compares the age distribution of the males who survived with the age distribution of the males who did not.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+titanic_df.loc[(titanic_df["sex"]=="male") & (titanic_df["survived"]==0)].age.plot.hist(alpha=0.5,legend=True,label="Survived=0")
+titanic_df.loc[(titanic_df["sex"]=="male") & (titanic_df["survived"]==1)].age.plot.hist(alpha=0.5,legend=True,label="Survived=1")
+### END SOLUTION
 
 # **Exercise 3.** What proportion of 1st class passengers survived? What proportion of 3rd class passengers survived? See if you can use boolean masks to do this.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+display((titanic_df.loc[(titanic_df["pclass"]==1) & (titanic_df["survived"]==1)].shape[0])/titanic_df.loc[(titanic_df["pclass"]==1)].shape[0])
+display((titanic_df.loc[(titanic_df["pclass"]==3) & (titanic_df["survived"]==1)].shape[0])/titanic_df.loc[(titanic_df["pclass"]==1)].shape[0])
+### END SOLUTION
 
 # Exercises 4-7 ask you to analyze the Tips data set (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv`). The following code reads the data into a `DataFrame` called `tips_df` and creates a new column called `tip_percent` out of the `tip` and `total_bill` columns. This new column represents the tip as a percentage of the total bill (as a number between 0 and 1).
 
@@ -195,23 +201,38 @@ tips_df
 
 # **Exercise 4.** Calculate the average tip percentage paid by parties of 4 or more.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips_df.loc[tips_df["size"]>=4,:].tip_percent.mean()
+### END SOLUTION
 
 # **Exercise 5.** Make a visualization comparing the distribution of tip percentages left by males and females. How do they compare?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips_df.loc[tips_df["sex"]=="Male",:].tip_percent.plot.hist(legend=True,alpha=0.5,density=True,label="Male")
+tips_df.loc[tips_df["sex"]=="Female",:].tip_percent.plot.hist(legend=True,alpha=0.5,density=True,label="Female")
+### END SOLUTION
 
 # **Exercise 6.** What is the average table size on weekdays? (_Hint:_ There are at least two ways to create the appropriate boolean mask: using the `|` logical operator and using the `.isin()` method. See if you can do it both ways.)
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+print(tips_df.loc[tips_df["day"].isin(["Mon","Tue","Wed","Thur","Fri"]),:]["size"].mean())
+print(tips_df.loc[(tips_df["day"] == "Mon") | (tips_df["day"] == "Tue") | (tips_df["day"] == "Wed") | (tips_df["day"] == "Thur") | (tips_df["day"] == "Fri"),:]["size"].mean())
+### END SOLUTION
 
 # **Exercise 7.** Calculate the average table size for each day of the week. On which day of the week does the waiter serve the largest parties, on average?
 
-# +
-# YOUR CODE HERE
+## YOUR CODE HERE
+### BEGIN SOLUTION
+print("Mon",tips_df.loc[(tips_df["day"] == "Mon"),"size"].mean())
+print("Tues",tips_df.loc[(tips_df["day"] == "Tues"),"size"].mean())
+print("Wed",tips_df.loc[(tips_df["day"] == "Wed"),"size"].mean())
+print("Thur",tips_df.loc[(tips_df["day"] == "Thur"),"size"].mean())
+print("Fri",tips_df.loc[(tips_df["day"] == "Fri"),"size"].mean())
+print("Sat",tips_df.loc[(tips_df["day"] == "Sat"),"size"].mean())
+print("Sun",tips_df.loc[(tips_df["day"] == "Sun"),"size"].mean())
+### END SOLUTION
+
+

@@ -1,7 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py,md
+#     formats: ipynb,md
 #     text_representation:
 #       extension: .py
 #       format_name: light
@@ -84,32 +84,41 @@ survival_rates.loc[2]
 
 tips_df = pd.read_csv("/data301/data/tips.csv")
 tips_df["tip_percent"] = tips_df.tip / tips_df.total_bill
+tips_df.head()
 
 # **Exercise 1.** On which day of the week does the waiter serve the largest parties, on average? (You did this exercise in the previous section. See how much easier it is to do using `.groupby()`.)
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips_df.groupby("day")["size"].mean()
+### END SOLUTION
 
 # **Exercise 2.** Calculate the average bill by day and time. What day-time combination has the highest average bill?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips_df.groupby(["day","time"])["total_bill"].mean()
+### END SOLUTION
 
 # **Exercise 3.** Extract the average bill for Friday lunch from the result of Exercise 2.
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips_df.groupby(["day","time"])["total_bill"].mean()["Fri"]["Lunch"]
+### END SOLUTION
 
 # **Exercise 4.** Use `.groupby()` to make a visualization comparing the distribution of tip percentages left by males and females. How do they compare?
 
-# +
-# YOUR CODE HERE
-# -
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips_df.groupby(["day","time"])["total_bill"].mean()["Fri"]["Lunch"]
+### END SOLUTION
 
 # **Exercise 5.** Make a visualization that shows the average tip percentage as a function of table size.
 
-# +
-# YOUR CODE HERE
+## YOUR CODE HERE
+### BEGIN SOLUTION
+tips_df.groupby("size")["tip_percent"].mean().plot.bar()
+### END SOLUTION
+
+

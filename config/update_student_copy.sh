@@ -1,4 +1,6 @@
+rm -rf ../data-301-student/*
 cp -Rp * ../data-301-student/
+find ../data-301-student/ -name "*.ipynb" -exec rm -f {} \;
 
 # TODO go through every md file and remove certain sections
 # BEGIN SOLUTION
