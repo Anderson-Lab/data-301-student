@@ -65,18 +65,3 @@ _Hint:_ You might want to consider looking at:
 ```
 
 **YOUR EXPLANATION HERE (although you may want to add more markdown cells)**
-
-
-## Submission Instructions
-
-Once you are finished, follow these steps:
-
-1. Restart the kernel and re-run this notebook from beginning to end by going to `Kernel > Restart Kernel and Run All Cells`.
-2. If this process stops halfway through, that means there was an error. Correct the error and repeat Step 1 until the notebook runs from beginning to end.
-3. Double check that there is a number next to each code cell and that these numbers are in order.
-
-Then, submit your lab as follows:
-
-1. Go to `File > Export Notebook As > PDF`.
-2. Double check that the entire notebook, from beginning to end, is in this PDF file. (If the notebook is cut off, try first exporting the notebook to HTML and printing to PDF.)
-3. Upload the PDF [to PolyLearn](https://polylearn.calpoly.edu/AY_2018-2019/mod/assign/view.php?id=306678).
