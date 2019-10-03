@@ -84,11 +84,17 @@ display(df.set_index("Company")["Amount"].idxmax())
 #
 # _Hint:_ If $n$ sharks funded a given venture, then the amount that each shark invested is the total amount divided by $n$.
 
+myfunc = lambda: 1
+myfunc()
+
+# !pwd
+
 ## YOUR CODE HERE
 ### BEGIN SOLUTION
 df2 = df.copy()
-df2.loc[:,["Corcoran","Cuban","Greiner","Herjavec","John","O'Leary","Harrington","Guest"]] = df.loc[:,["Company","Corcoran","Cuban","Greiner","Herjavec","John","O'Leary","Harrington","Guest"]].groupby("Company").apply(lambda x: x/sum(x.iloc[0,:])).fillna(0)
-df2.loc[:,["Company","Amount","Corcoran","Cuban","Greiner","Herjavec","John","O'Leary","Harrington","Guest"]].groupby("Company").apply(lambda x: x.iloc[0,0]*x.iloc[0,1:]).sum().sort_values()
+names = ["Corcoran","Cuban","Greiner","Herjavec","John","O'Leary","Harrington","Guest"]
+df2.loc[:,names] = df.loc[:,["Company"]+names].groupby("Company").apply(lambda x: x/sum(x.iloc[0,:])).fillna(0)
+df2.loc[:,["Company","Amount"]+names].groupby("Company").apply(lambda x: x.iloc[0,0]*x.iloc[0,1:]).sum().sort_values()
 ### END SOLUTION
 
 # **ENTER YOUR WRITTEN EXPLANATION HERE.**

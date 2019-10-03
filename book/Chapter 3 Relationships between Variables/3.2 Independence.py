@@ -84,6 +84,14 @@ pclass
 
 np.outer(pclass, adult)
 
+# But wait... Can't we just use matrix multiplication? The answer is yes, but you need to make sure you are actually dealing with matrices.
+
+pclass.values.reshape(-1,1)*adult.values.reshape(-1,1).transpose()
+
+# or...
+
+np.matmul(pclass.to_frame(),(adult.to_frame().transpose()))
+
 # Note that this returns a plain `numpy` `array` instead of a `pandas` `DataFrame`. It turns out that this will be good enough for our purposes.
 
 # ## Measuring Distance from Independence
@@ -137,5 +145,21 @@ expected = np.outer(pclass, adult)
 
 # **Exercise 1.** Report a measure of the strength of the relationship between the size of the party and the day of the week.
 
-# +
-# YOUR CODE HERE 
+# YOUR CODE HERE
+# BEGIN SOLUTION
+df = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv")
+N = df.shape[0]
+size_day = pd.crosstab(df["size"], df["day"])
+sz = size_day.sum(axis=0)/N
+day = size_day.sum(axis=1)/N
+joint = size_day/N
+display(joint)
+display(sz)
+display(day)
+expected = np.outer(day,sz)
+display(expected)
+display(joint)
+(((joint - expected) ** 2) / expected).sum().sum()
+# END SOLUTION
+
+

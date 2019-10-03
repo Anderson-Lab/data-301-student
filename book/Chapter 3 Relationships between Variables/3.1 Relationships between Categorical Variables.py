@@ -31,7 +31,7 @@ titanic_df = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-b
 # Suppose we want to understand the relationship between where a passenger embarked and what class they were in. We can completely summarize this relationship by counting the number of passengers in each class that embarked at each location. We can create a pivot table that summarizes this information.
 
 embarked_pclass_counts = titanic_df.pivot_table(
-    index="embarked", columns="pclass",
+    index="embarked", columns=["pclass"],
     values="name",  # We can pretty much count any column, as long as there are no NaNs.
     aggfunc="count" # The count function will count the number of non-null values.
 )
@@ -39,8 +39,10 @@ embarked_pclass_counts
 
 # A pivot table that stores counts is also called a **contigency table** or a **cross-tabulation**. This type of pivot table is common enough that there is a specific function in `pandas` to calculate one, allowing you to bypass `.pivot_table`:
 
+titanic_df.shape
+
 counts = pd.crosstab(titanic_df.embarked, titanic_df.pclass)
-counts
+counts.sum(axis=0)/counts.sum().sum()
 
 # ## Joint Distributions
 
@@ -153,6 +155,8 @@ embarked_given_pclass
 # There is also another set of conditional distributions for these two variables: the distribution of class, conditional on where they embarked. To calculate these conditional distributions, we instead divide `embarked_pclass_counts` by the sum of each row:
 
 embarked_counts = embarked_pclass_counts.sum(axis=1)
+display(embarked_counts)
+display(embarked_pclass_counts)
 pclass_given_embarked = embarked_pclass_counts.divide(embarked_counts, axis=0)
 pclass_given_embarked
 
@@ -162,11 +166,11 @@ pclass_given_embarked
 #
 # _Question 1._ What proportion of 3rd class passengers embarked at Southampton?
 #
-# $$P\big(\textrm{embarked at Southampton}\ \big|\ \textrm{in 3rd class}\big) = \frac{\text{# passengers who embarked at Southampton and in 3rd class}}{\text{# passengers who in 3rd class}}$$
+# $$P\big(\textrm{embarked at Southampton}\ \big|\ \textrm{in 3rd class}\big) = \frac{\text{passengers who embarked at Southampton and in 3rd class}}{\text{ passengers who in 3rd class}}$$
 #
 # _Question 2._ What proportion of Southampton passengers were in 3rd class? 
 #
-# $$P\big(\textrm{in 3rd class}\ \big|\ \textrm{embarked at Southampton}\big) = \frac{\text{# passengers who embarked at Southampton and in 3rd class}}{\text{# passengers who embarked at Southampton}} \\ $$
+# $$P\big(\textrm{in 3rd class}\ \big|\ \textrm{embarked at Southampton}\big) = \frac{\text{passengers who embarked at Southampton and in 3rd class}}{\text{passengers who embarked at Southampton}} \\ $$
 #
 #
 #
@@ -176,7 +180,7 @@ pclass_given_embarked
 #
 # _Question 3._ What proportion of passengers embarked at Southampton _and_ were in 3rd class?
 #
-# $$P(\text{embarked at Southampton and in 3rd class}) = \frac{\text{# passengers who embarked at Southampton and in 3rd class}}{\text{# passengers (total)}}$$
+# $$P(\text{embarked at Southampton and in 3rd class}) = \frac{\text{passengers who embarked at Southampton and in 3rd class}}{\text{passengers (total)}}$$
 #
 # The reference population here is all passengers. This is the proportion that one would get from the joint distribution.
 #
@@ -202,7 +206,7 @@ sns.heatmap(joint)
 #
 # To make a stacked bar graph, we simply specify `stacked=True` in `.plot.bar()`, to get the bars to show up on top of one another, instead of side-by-side:
 
-pclass_given_embarked.plot.bar(stacked=True)
+pclass_given_embarked.plot.barh(stacked=True)
 
 # However, the same code does not work on the other set of conditional distributions:
 
@@ -226,29 +230,49 @@ embarked_given_pclass.T
 
 # **Exercise 1.** Make a visualization that displays the relationship between the day of the week and party size.
 
-# +
-# ENTER YOUR CODE HERE
-# -
+# YOUR CODE HERE
+# BEGIN SOLUTION
+df = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv")
+size_day = pd.crosstab(df["size"], df["day"])
+display(size_day)
+display(size_day.sum(axis=0))
+display(size_day.divide(size_day.sum(axis=0),axis=1))
+display(size_day.divide(size_day.sum(axis=0),axis=1).transpose().plot.bar(stacked=True))
+# END SOLUTION
 
 # **Exercise 2.** Calculate the marginal distribution of day of week in two different ways.
 
-# +
 # ENTER YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+joint = pd.crosstab(df["day"], df["size"],
+            normalize=True, margins=True)
+display(joint)
+(pd.crosstab(df["day"], df["size"])/df.shape[0]).sum(axis=1)
+# END SOLUTION
 
 # **Exercise 3.** Make a visualization that displays the conditional distribution of party size, given the day of the week.
 
-# +
 # ENTER YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+joint = pd.crosstab(df["day"], df["size"])
+display(joint)
+display(joint.sum(axis=1))
+display(joint.divide(joint.sum(axis=1),axis=0))
+# END SOLUTION
 
 # **Exercise 4.** What proportion of Saturday parties had 2 people? Is this the same as the proportion of 2-person parties that dined on Saturday?
 
-# +
 # ENTER YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+joint = pd.crosstab(df["day"], df["size"])
+display(joint)
+display(joint.sum(axis=1))
+display(joint.divide(joint.sum(axis=1),axis=0))
+# END SOLUTION
 
 # **Challenge Exercise.** We discussed above that the conditional distributions of A given B and the conditional distributions of B given A are _not_ the same. Can you figure out a way to relate the two? Can you write code that will convert a table with the conditional distributions of A given B, into a table with the conditional distributions of B given A?
 
 # +
 # ENTER YOUR CODE HERE
+# BEGIN SOLUTION
+# END SOLUTION
