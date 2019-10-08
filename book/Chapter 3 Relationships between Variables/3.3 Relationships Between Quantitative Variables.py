@@ -87,22 +87,27 @@ housing_df["Gr Liv Area"].corr(housing_df["SalePrice"])
 
 # **Exercise 1.** What is the correlation between any variable and itself? Check your answer with any (quantitative) variable from the Ames housing data set.
 
-# +
 # ENTER YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+housing_df["Gr Liv Area"].corr(housing_df)
+# END SOLUTION
 
 # Exercises 2-3 deal with the Tips data set (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv`).
 
 # **Exercise 2.** Make a scatterplot showing the relationship between the tip and the total bill.
 
-# +
 # ENTER YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+tips = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv")
+tips.plot.scatter(x="total_bill",y="tip")
+# END SOLUTION
 
 # **Exercise 3.** Which pair of variables in this data set have the highest correlation with each other?
 
-# +
 # ENTER YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+display(tips.corr())
+print("Total bill and tip")
+# END SOLUTION
 
 # **Exercise 4.** To build your intuition about correlation, play this [correlation guessing game](http://guessthecorrelation.com/). There is even a two-player mode that allows you to play against a friend in the class.

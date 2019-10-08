@@ -258,6 +258,7 @@ joint = pd.crosstab(df["day"], df["size"])
 display(joint)
 display(joint.sum(axis=1))
 display(joint.divide(joint.sum(axis=1),axis=0))
+display(joint.divide(joint.sum(axis=1),axis=0).plot.bar(stacked=True))
 # END SOLUTION
 
 # **Exercise 4.** What proportion of Saturday parties had 2 people? Is this the same as the proportion of 2-person parties that dined on Saturday?
@@ -276,3 +277,20 @@ display(joint.divide(joint.sum(axis=1),axis=0))
 # ENTER YOUR CODE HERE
 # BEGIN SOLUTION
 # END SOLUTION
+# -
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
