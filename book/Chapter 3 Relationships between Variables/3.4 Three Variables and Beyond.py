@@ -174,17 +174,29 @@ housing_df[variables].corr()
 
 # **Exercise 1.** Make a scatterplot (using `pandas` and `matplotlib`) showing the relationship between the tip and the total bill. Use color to indicate whether the tipper was male or female and the size of each point to represent the party size.
 
-# +
 # TYPE YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+tips = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv")
+tips.plot.scatter(x="tip",y="total_bill",c=tips["sex"].map({"Male": "blue", "Female": "red"}),s=tips["size"]*20)
+# END SOLUTION
 
 # **Exercise 2.** Repeat Exercise 1, but using Altair. Can you incorporate even more variables into this figure?
 
-# +
+tips.head()
+
 # TYPE YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+tips = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv")
+Chart(tips).mark_point().encode(x="tip",y="total_bill",color="sex",size="size",shape="smoker")
+print("I added smoker")
+# END SOLUTION
 
 # **Exercise 3.** Calculate the correlation matrix summarizing the pairwise relationships between the quantitative variables in this data set. Interpret what you see.
 
-# +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+tips.corr()
+print("tip and total_bill are the most highly correlated. The matrix is symmetric and the diagonals are always 1.")
+# END SOLUTION
+
+
