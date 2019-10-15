@@ -127,6 +127,12 @@ housing_df_std = (
 )
 housing_df_std
 
+housing_df_std
+
+housing_df_std.iloc[:,0].std()
+
+housing_df_quant.mean()
+
 # Notice that the resulting `DataFrame` contains negative values. This makes sense because standardizing makes the mean of every variable equal to 0. If the mean is 0, then some values must be negative.
 #
 # The above command is deceptively simple. We actually subtracted a `DataFrame` by a `Series`, then divided the resulting `DataFrame` by another `Series`. We relied on `pandas` to broadcast each `Series` over the right dimension of the `DataFrame`. To be more explicit about the broadcasting, we could have also used the `.sub()` and `.divide()` methods (instead of `-` and `/`) and been explicit about the axis:
@@ -163,6 +169,21 @@ np.sqrt(((x - x1) ** 2).sum())
 
 # +
 # YOUR CODE HERE
+# BEGIN SOLUTION
+housing_df_norm = (housing_df_quant.
+                  divide(np.sqrt((housing_df_quant**2).sum(axis=0)), axis=1))
+display(housing_df_norm)
+x = housing_df_norm.loc[2927]
+x1 = housing_df_norm.loc[2928]
+
+display(np.sqrt(((x - x1) ** 2).sum()))
+
+x = housing_df_norm.loc[2498]
+x1 = housing_df_norm.loc[290]
+
+np.sqrt(((x - x1) ** 2).sum())
+print("In this case, the conclusion is about the same")
+# END SOLUTION
 # -
 
 # **Exercise 2.** Instead of standardizing the three variables from the Ames housing data set, apply a min-max scaling to them. Then, recompute the distances between the two pairs of points above. Does your conclusion change?

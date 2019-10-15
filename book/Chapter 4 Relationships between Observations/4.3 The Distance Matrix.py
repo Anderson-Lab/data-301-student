@@ -93,6 +93,10 @@ D_
 
 D_.max(axis=1)
 
+# You may also convert the D_ matrix to a ``pandas`` dataframe.
+
+pd.DataFrame(D_)
+
 # # Exercises
 #
 # Exercises 1-3 ask you to work with a data set that describes the chemical composition of 1599 red wines (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/wines/reds.csv`). All 12 variables in this data set are quantitative.
