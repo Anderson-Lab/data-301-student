@@ -176,13 +176,13 @@ display(housing_df_norm)
 x = housing_df_norm.loc[2927]
 x1 = housing_df_norm.loc[2928]
 
-display(np.sqrt(((x - x1) ** 2).sum()))
+d1 = np.sqrt(((x - x1) ** 2).sum())
 
 x = housing_df_norm.loc[2498]
 x1 = housing_df_norm.loc[290]
 
-np.sqrt(((x - x1) ** 2).sum())
-print("In this case, the conclusion is about the same")
+d2 = np.sqrt(((x - x1) ** 2).sum())
+print("Raio:",d1/d2)
 # END SOLUTION
 # -
 
@@ -190,14 +190,50 @@ print("In this case, the conclusion is about the same")
 
 # +
 # YOUR CODE HERE
+# BEGIN SOLUTION
+housing_df_min_max = (housing_df_quant - housing_df_quant.min()).divide(housing_df_quant.max()-housing_df_quant.min(), axis=1)
+display(housing_df_norm)
+x = housing_df_min_max.loc[2927]
+x1 = housing_df_min_max.loc[2928]
+
+d1 = np.sqrt(((x - x1) ** 2).sum())
+display(d1)
+
+x = housing_df_min_max.loc[2498]
+x1 = housing_df_min_max.loc[290]
+
+d2 = np.sqrt(((x - x1) ** 2).sum())
+display(d2)
+print("Raio:",d1/d2)
+print("They appear a little farther away")
+# END SOLUTION
 # -
 
 # Exercises 3-5 ask you to work with a data set that describes the chemical composition of 1599 red wines (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/wines/reds.csv`). There are 12 variables in this data set, all of which are quantitative (so each observation is a point in 12-dimensional space).
+
+# !head reds.csv
+
+reds = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/wines/reds.csv",sep=";")
 
 # **Exercise 3.** Which red wine is more similar to wine 0 in the `DataFrame`: wine 6 or wine 36? (Do not scale the variables.) Does your answer depend on which distance metric you use to measure "similarity"?
 
 # +
 # YOUR CODE HERE
+# BEGIN SOLUTION
+x = reds.loc[0]
+x1 = reds.loc[6]
+x2 = reds.loc[36]
+
+d1 = np.sqrt(((x - x1) ** 2).sum())
+d2 = np.sqrt(((x - x2) ** 2).sum())
+print(d1,d2)
+print("Wine 36 is closer according to Euclidean")
+
+d1 = np.sqrt((x - x1).abs().sum())
+d2 = np.sqrt((x - x2).abs().sum())
+print(d1,d2)
+print("Wine 6 is closer according to city-block distance")
+# END SOLUTION
 # -
 
 # **Exercise 4.** Now suppose we agree to measure similarity using Euclidean distance, and we wish to investigate the effect of scaling the variables. Which red wine is more similar to wine 0: wine 6 or wine 36? Does the answer depend on whether the variables are scaled or not? Does it depend on the choice of scaling?

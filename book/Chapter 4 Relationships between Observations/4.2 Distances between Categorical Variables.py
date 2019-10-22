@@ -77,8 +77,26 @@ titanic.loc[[0, 238]]
 #
 # Based on these $K$ variables only, calculate the Euclidean distance between house 0 and each of the other houses in the data set. What are the possible values of the Euclidean distance? Can you explain what a distance of $0$ means, in the context of this variable? What about a distance of $1$?
 
+np.sqrt(1+1)
+
 # +
 # ENTER YOUR CODE HERE
+# BEGIN SOLUTION
+import numpy as np
+import pandas as pd
+pd.options.display.max_rows = 5
+
+housing_df = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/AmesHousing.txt",
+                         sep="\t")
+housing_df.head()
+ndf = pd.get_dummies(housing_df["Neighborhood"])
+print(len(ndf.columns))
+display(np.sqrt(
+    ((ndf - ndf.loc[0]) ** 2).sum(axis=1)
+).sort_values())
+print("0 means the exact neighborhood")
+print("1 would have to mean that one of the two observations being compared has no neighborhood")
+# END SOLUTION
 # -
 
 # **Exercise 2.** Suppose that you really like house 0 in the data set, but it is too expensive. Find cheaper homes that are similar to it, by calculating distances after encoding categorical variables as dummy variables. Be sure to actually look at the profiles of the homes that your algorithm picked out as most similar. Do they make sense?
@@ -89,5 +107,12 @@ titanic.loc[[0, 238]]
 #
 # _Hint:_ There are too many variables in the data set. Do not try to call `pd.get_dummies()` on the entire `DataFrame`! You will want to pare down the number of variables, but be sure to include a mixture of categorical and quantitative variables. Refer to the [data documentation](https://ww2.amstat.org/publications/jse/v19n3/decock/DataDocumentation.txt) for information about the variables.
 
-# +
 # ENTER YOUR CODE HERE
+# BEGIN SOLUTION
+print("""
+A bit of an open ended question. If they go through and try a 
+few different scaling methods and distance metrics with some set 
+of variables, then I would say they are good.""")
+# END SOLUTION
+
+

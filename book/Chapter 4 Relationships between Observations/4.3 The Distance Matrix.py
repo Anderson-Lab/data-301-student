@@ -103,17 +103,33 @@ pd.DataFrame(D_)
 
 # **Exercise 1.** Calculate the distance between every pair of wines in this data set.
 
-# +
 # YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+import pandas as pd
+reds = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/wines/reds.csv",sep=";")
+reds.index = [str(v)+"_wine" for v in reds.index.astype(str)]
+from sklearn.metrics import pairwise_distances
+D_ = pairwise_distances(reds, metric="euclidean")
+D = pd.DataFrame(D_,index=reds.index,columns=reds.index)
+D
+# END SOLUTION
 
 # **Exercise 2.** Using the distance matrix that you calculated in Exercise 1, calculate the distance of the wine that is most similar to each wine.
 
-# +
 # YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+import numpy as np
+D.iloc[range(D.shape[0]),range(D.shape[0])]=np.nan
+#D.loc[D.index,D.index]=np.nan
+D.min()
+#D.idxmin()
+# END SOLUTION
 
 # **Exercise 3.** Using the distance matrix that you calculated in Exercise 1, determine the identity of the wine that is most similar to each wine.
 
-# +
 # YOUR CODE HERE
+# BEGIN SOLUTION
+D.idxmin()
+# END SOLUTION
+
+
