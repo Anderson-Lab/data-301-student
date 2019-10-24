@@ -159,6 +159,7 @@ get_val_error(X_train, y_train, X_val, y_val)
 
 get_val_error(X_val, y_val, X_train, y_train)
 
+
 # Now we have two, somewhat independent estimates of the test error. It is common to average the two to obtain an overall estimate of the test error, called the **cross-validation error**. Notice that the cross-validation error uses each observation in the data exactly once. We make a prediction for each observation, but always using a model that was trained on data that does not include that observation.
 
 # # Exercises
@@ -167,9 +168,102 @@ get_val_error(X_val, y_val, X_train, y_train)
 
 # +
 # YOUR CODE HERE
+# BEGIN SOLUTION
+def get_val_error(X_train, y_train, X_val, y_val,ks=[]):
+    
+    # convert categorical variables to dummy variables
+    vec = DictVectorizer(sparse=False)
+    vec.fit(X_train_dict)
+    X_train = vec.transform(X_train_dict)
+    X_val = vec.transform(X_val_dict)
+
+    # standardize the data
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train_sc = scaler.transform(X_train)
+    X_val_sc = scaler.transform(X_val)
+    
+    # Fit a 10-nearest neighbors model.
+    rmse = []
+    for k in ks:
+        model = KNeighborsRegressor(n_neighbors=k)
+        model.fit(X_train_sc, y_train)
+
+        # Make predictions on the validation set.
+        y_val_pred = model.predict(X_val_sc)
+        rmse.append(np.sqrt(((y_val - y_val_pred) ** 2).mean()))
+    
+    return pd.DataFrame({"k":ks,"RMSE":rmse})
+
+get_val_error(X_val, y_val, X_train, y_train,ks=[1,10])
+# END SOLUTION
 # -
 
 # **Exercise 2.** Using the Tips data set (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv`), train $k$-nearest neighbors regression models to predict the tip for different values of $k$. Calculate the training and validation MAE of each model, and make a plot showing these errors as a function of $k$.
 
 # +
 # YOUR CODE HERE
+# BEGIN SOLUTION
+def get_val_error(X_train, y_train, X_val, y_val,ks=[]):
+    
+    # convert categorical variables to dummy variables
+    vec = DictVectorizer(sparse=False)
+    vec.fit(X_train_dict)
+    X_train = vec.transform(X_train_dict)
+    X_val = vec.transform(X_val_dict)
+
+    # standardize the data
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+    X_train_sc = scaler.transform(X_train)
+    X_val_sc = scaler.transform(X_val)
+    
+    # Fit a 10-nearest neighbors model.
+    train_rmse = []
+    val_rmse = []
+    for k in ks:
+        model = KNeighborsRegressor(n_neighbors=k)
+        model.fit(X_train_sc, y_train)
+
+        # Make predictions on the validation set.
+        y_train_pred = model.predict(X_train_sc)
+        train_rmse.append(np.sqrt(((y_train - y_train_pred) ** 2).mean()))        
+        y_val_pred = model.predict(X_val_sc)
+        val_rmse.append(np.sqrt(((y_val - y_val_pred) ** 2).mean()))
+    
+    return pd.DataFrame({"k":ks,"Training RMSE":train_rmse,"Validation RMSE":val_rmse})
+
+tips = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv')
+
+# Define the features.
+features = ["total_bill","sex"]
+
+train = tips.sample(frac=.5)
+val = tips.drop(train.index)
+
+X_train_dict = train[features].to_dict(orient="records")
+X_val_dict = val[features].to_dict(orient="records")
+
+y_train = train["tip"]
+y_val = val["tip"]
+
+from sklearn.feature_extraction import DictVectorizer
+from sklearn.preprocessing import StandardScaler
+
+# convert categorical variables to dummy variables
+vec = DictVectorizer(sparse=False)
+vec.fit(X_train_dict)
+X_train = vec.transform(X_train_dict)
+X_val = vec.transform(X_val_dict)
+
+# standardize the data
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_sc = scaler.transform(X_train)
+X_val_sc = scaler.transform(X_val)
+
+get_val_error(X_val_sc, y_val, X_train_sc, y_train,ks=[1,10])
+# END SOLUTION
+# -
+
+

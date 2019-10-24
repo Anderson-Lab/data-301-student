@@ -169,3 +169,46 @@ y_train - y_train_pred
 
 # +
 # TYPE YOUR CODE HERE.
+# BEGIN SOLUTION
+tips = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv')
+
+# Define the features.
+features = ["total_bill","sex"]
+
+# Define the training data.
+# Represent the features as a list of dicts.
+X_train_dict = tips[features].to_dict(orient="records")
+X_new_dict = [{
+    "total_bill":40,
+    "sex":"Male"
+}]
+y_train = tips["tip"]
+
+# Dummy encoding
+vec = DictVectorizer(sparse=False)
+vec.fit(X_train_dict)
+X_train = vec.transform(X_train_dict)
+X_new = vec.transform(X_new_dict)
+
+# Standardization
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_sc = scaler.transform(X_train)
+X_new_sc = scaler.transform(X_new)
+
+results = pd.DataFrame(columns=["MAE"],index=[3,10,20,30])
+
+# K-Nearest Neighbors Model
+for k in results.index:
+    model = KNeighborsRegressor(n_neighbors=k)
+    model.fit(X_train_sc, y_train)
+    y_train_pred = model.predict(X_train_sc)
+
+    # Calculate the MAE
+    results.loc[k]["MAE"] = (y_train - y_train_pred).abs().mean()
+    
+results["MAE"].plot.bar()
+# END SOLUTION
+# -
+
+

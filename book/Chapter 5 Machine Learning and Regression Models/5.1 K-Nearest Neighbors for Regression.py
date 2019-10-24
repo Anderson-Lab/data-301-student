@@ -228,6 +228,8 @@ housing.plot.scatter(x="Gr Liv Area", y="SalePrice", color="black", alpha=.2)
 
 # Add the predictions as a red line on this scatterplot
 y_new_pred.plot.line(color="red")
+
+
 # -
 
 # Notice how rough the 30-nearest neighbors regression function looks. In particular, look at the right half of the graph where the training data is sparse. The regression function is a step function in this range. That is because the value of the prediction changes only when the identities of the 30-nearest neighbors change. Houses with a square footage between 4500 and 6000 all have the same 30 nearest neighbors in the training data, so the prediction is constant in that range.
@@ -238,17 +240,104 @@ y_new_pred.plot.line(color="red")
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+def get_KNN_prediction(x_new,k):
+    """Given new observation, returns 30-nearest neighbors prediction
+    """
+    dists = ((X_train - x_new) ** 2).sum(axis=1)
+    inds_sorted = dists.sort_values().index[:k]
+    return y_train.loc[inds_sorted].mean()
+
+# Make a scatterplot of the training data
+housing.plot.scatter(x="Gr Liv Area", y="SalePrice", color="black", alpha=.2,legend=True)
+
+colors = ["red","blue","green"]
+for i,k in enumerate([5,30,100]):
+    y_new_pred = X_new.apply(lambda x: get_KNN_prediction(x,k), axis=1)
+    y_new_pred.index = X_new
+    y_new_pred.plot.line(color=colors[i],label=k,legend=True)
+# END SOLUTION
 # -
 
 # **Exercise 2.** You would like to predict how much a male diner will tip on a bill of \\$40.00 on a Sunday. Build a $k$-nearest neighbors model to answer this question, using the Tips dataset (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv`) as your training data.
 
 # +
 # TYPE YOUR CODE HERE
+x_new = pd.Series([40,"Male"],index=["total_bill","sex"])
+tips = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv')
+display(tips.head())
+
+features = ["total_bill","sex"]
+
+# Note that "Neighborhood" is a categorical variable.
+X_train = pd.get_dummies(tips[features])
+y_train = tips["tip"]
+
+display(X_train.head())
+
+X_train_mean = X_train.mean()
+X_train_std = X_train.std()
+
+X_train_sc = (X_train - X_train_mean) / X_train_std
+
+x_new = pd.Series(index=X_train.columns)
+
+# Set the values of the known variables.
+x_new["total_bill"] = 40
+
+x_new["sex_Male"] = 1
+# The dummy variables for the other neighborhoods all have value 0.
+x_new.fillna(0, inplace=True)
+
+x_new_sc = (x_new - X_train_mean) / X_train_std
+x_new_sc
+
+def get_KNN_prediction(x_new_sc,k):
+    """Given new observation, returns 30-nearest neighbors prediction
+    """
+    dists = ((X_train_sc - x_new_sc) ** 2).sum(axis=1)
+    inds_sorted = dists.sort_values().index[:k]
+    return y_train.loc[inds_sorted].mean()
+
+get_KNN_prediction(x_new_sc,3),get_KNN_prediction(x_new_sc,10),get_KNN_prediction(x_new_sc,20)
 # -
 
 # **Challenge Exercise.** We visualized the $k$-nearest neighbors regression function above, in the special case where there is only one feature. It is also possible to visualize a regression function in the case where there are two features, using a heat map, where the two axes represent the two features and the color represents the label.
 #
-# Make a heat map that shows the 30-nearest neighbors regression function when there are two features in the model: square footage (`Gr Liv Area`) and number of bedrooms (`Bedroom AbvGr`).
+# Make a heat map that shows the 30-nearest neighbors regression function for tip when there are two features in the model: `total_bill` and number of `size`.
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+import altair as alt
+import numpy as np
+import pandas as pd
+
+X_train = tips[["total_bill", "size"]]
+y_train = tips["tip"]
+
+X_train_mean = X_train.mean()
+X_train_std = X_train.std()
+X_train_sc = (X_train - X_train_mean) / X_train_std
+def get_KNN_prediction(x_new_sc,k):
+    """Given new observation, returns 30-nearest neighbors prediction
+    """
+    dists = ((X_train_sc - x_new_sc) ** 2).sum(axis=1)
+    inds_sorted = dists.sort_values().index[:k]
+    return y_train.loc[inds_sorted].mean()
+
+X_train_sc["knn_tip"] = X_train_sc.apply(lambda x: get_KNN_prediction(x,30), axis=1)
+
+X_train_sc["tip"] = y_train
+X_train_sc["size (Not scaled)"] = X_train["size"] 
+X_train_sc["total_bill (Not scaled)"] = X_train["total_bill"] 
+
+alt.Chart(X_train_sc).mark_rect().encode(
+    y='total_bill (Not scaled)',
+    x='size (Not scaled):O',
+    color='knn_tip:Q'
+)
+# END SOLUTION
+# -
+
+

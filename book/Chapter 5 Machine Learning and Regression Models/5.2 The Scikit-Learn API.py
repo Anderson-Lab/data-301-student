@@ -198,3 +198,47 @@ model.predict(X_new_sc)
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+# Read in the data.
+tips = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv')
+
+# Define the features.
+features = ["total_bill","sex"]
+
+# Define the training data.
+# Represent the features as a list of dicts.
+X_train_dict = tips[features].to_dict(orient="records")
+X_new_dict = [{
+    "total_bill":40,
+    "sex":"Male"
+}]
+y_train = tips["tip"]
+
+# Dummy encoding
+vec = DictVectorizer(sparse=False)
+vec.fit(X_train_dict)
+X_train = vec.transform(X_train_dict)
+X_new = vec.transform(X_new_dict)
+
+# Standardization
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_sc = scaler.transform(X_train)
+X_new_sc = scaler.transform(X_new)
+
+# K-Nearest Neighbors Model
+model = KNeighborsRegressor(n_neighbors=3)
+model.fit(X_train_sc, y_train)
+display(model.predict(X_new_sc))
+
+model = KNeighborsRegressor(n_neighbors=10)
+model.fit(X_train_sc, y_train)
+display(model.predict(X_new_sc))
+
+model = KNeighborsRegressor(n_neighbors=20)
+model.fit(X_train_sc, y_train)
+display(model.predict(X_new_sc))
+# END SOLUTION
+# -
+
+

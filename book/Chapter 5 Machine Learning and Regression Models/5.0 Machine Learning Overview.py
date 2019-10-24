@@ -13,11 +13,6 @@
 #     name: python3
 # ---
 
-# %%capture
-# !sudo apt-get update
-# !sudo apt-get -y install build-essential swig
-# !pip install auto-sklearn
-
 # # 5.0 My three cells: Machine Learning
 #
 # ## How could we predict the sale price of a home?
@@ -64,6 +59,16 @@ scaler = StandardScaler()
 scaler.fit(X_train)
 X_train_sc = scaler.transform(X_train)
 X_val_sc = scaler.transform(X_val)
+
+import autosklearn.regression
+
+automl = autosklearn.regression.AutoSklearnRegressor(
+        time_left_for_this_task=120,
+        per_run_time_limit=30,
+        tmp_folder='/tmp/autosklearn_regression_example_tmp',
+        output_folder='/tmp/autosklearn_regression_example_out',
+    )
+automl.fit(X_train_sc,y_train)
 # -
 
 # ### Machine Learning Black Box (AutoML for regression)
