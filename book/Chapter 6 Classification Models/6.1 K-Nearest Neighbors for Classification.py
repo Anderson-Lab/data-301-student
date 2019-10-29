@@ -144,6 +144,8 @@ model.predict(x_new_sc)
 
 model.predict_proba(x_new_sc)
 
+model.classes_
+
 # The first number represents the probability of the first class ("red") and the second number represents the probability of the second class ("white"). Notice that the predicted probabilities add up to 1, as they must.
 
 # # Exercises

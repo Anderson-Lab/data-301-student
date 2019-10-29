@@ -59,16 +59,6 @@ scaler = StandardScaler()
 scaler.fit(X_train)
 X_train_sc = scaler.transform(X_train)
 X_val_sc = scaler.transform(X_val)
-
-import autosklearn.regression
-
-automl = autosklearn.regression.AutoSklearnRegressor(
-        time_left_for_this_task=120,
-        per_run_time_limit=30,
-        tmp_folder='/tmp/autosklearn_regression_example_tmp',
-        output_folder='/tmp/autosklearn_regression_example_out',
-    )
-automl.fit(X_train_sc,y_train)
 # -
 
 # ### Machine Learning Black Box (AutoML for regression)
@@ -263,7 +253,7 @@ X_val_sc = scaler.transform(X_val)
 
 import autosklearn.classification
 
-automl = autosklearn.classification.AutoSklearnClassifier()
+automl = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=120,per_run_time_limit=30)
 automl.fit(X_train_sc,y_train)
 
 y_val_pred = automl.predict(pd.DataFrame(X_val_sc).fillna(0))
@@ -278,5 +268,7 @@ print("Our model performance (higher is better), Accuracy:",acc)
 #ax.set_ylim([0,600000]);
 # END SOLUTION
 # -
+1-train["survived"].sum()/len(train["survived"])
+
 
 

@@ -90,6 +90,9 @@ pipeline = Pipeline([("vectorizer", vec), ("scaler", scaler), ("fit", model)])
 
 # This entire `Pipeline` can be passed to `cross_val_score`, along with the data, the number of folds $k$ (`cv`), and the type of score (`scoring`). So $5$-fold cross validation in Scikit-Learn would look as follows:
 
+pipeline.fit(X_dict,y)
+pipeline.predict(X_dict)
+
 # +
 from sklearn.model_selection import cross_val_score
 
@@ -127,7 +130,7 @@ def get_cv_error(k):
     return mse
     
 ks = pd.Series(range(1, 51))
-ks.index = range(1, 51)
+#ks.index = range(1, 51)
 test_errs = ks.apply(get_cv_error)
 
 test_errs.plot.line()
@@ -164,3 +167,69 @@ X_dict = housing[features].to_dict(orient="records")
 -cross_val_score(pipeline, X_dict, y, cv=10, scoring="neg_mean_squared_error").mean()
 
 # The MSE actually goes down when we remove `Yr Sold`, so it seems that the model is better off without this variable.
+
+# ## GridSearchCV
+# Now it is time to improve our skills with help from sklearn. We could continue to use apply and cross_val_score for different hyperparameters and different methods, but with help from sklearn, our role is a lot more streamlined.
+#
+# Our example will construct a pipeline that does dimensionality reduction followed by regression with KNN. Unsupervised PCA and dimensionality reductions are compared to univariate feature selection during the grid search.
+
+# +
+# Some structure pulled from authors: Robert McGibbon, Joel Nothman, Guillaume Lemaitre
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_digits
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.neighbors import KNeighborsRegressor
+
+pipe = Pipeline([
+    ('vec',DictVectorizer(sparse=False)),
+    # the reduce_dim stage is populated by the param_grid
+    ('reduce_dim', PCA()),
+    ('regression', KNeighborsRegressor())
+])
+
+features = ["Lot Area", "Gr Liv Area",
+            "Full Bath", "Half Bath",
+            "Bedroom AbvGr", 
+            "Year Built",
+            "Neighborhood"]
+X_dict = housing[features].to_dict(orient="records")
+
+## GRID SEARCH
+N_FEATURES_OPTIONS = [2, 4, 8]
+k_OPTIONS = [1, 10, 100]
+param_grid = {
+        'reduce_dim__n_components': N_FEATURES_OPTIONS,
+        'regression__n_neighbors': k_OPTIONS
+}
+
+grid = GridSearchCV(pipe, cv=5, n_jobs=1, param_grid=param_grid, iid=False,scoring='neg_mean_squared_error',return_train_score=True)
+grid.fit(X_dict, y)
+# -
+
+grid.cv_results_
+
+# +
+mean_scores = np.array(grid.cv_results_['mean_test_score'])
+
+# scores are in the order of param_grid iteration, which is alphabetical
+#mean_scores = mean_scores.reshape(len(k_OPTIONS), -1, len(N_FEATURES_OPTIONS))
+# -
+
+results = pd.DataFrame(grid.cv_results_['params'])
+results["mean_test_score"] = mean_scores
+
+results
+
+results.pivot_table(index="regression__n_neighbors",columns="reduce_dim__n_components",values="mean_test_score").plot.bar()
+
+# # Exercises
+
+# # Exercise 1
+# Perform a grid search to help you find the best parameters for predicting the ``tip`` from the ``tips`` dataset. It is up to you to select the features and methods we've used in this book; however, you must include at least one categorical feature and you must include at least three steps in your pipeline like the one used above. Further, you must try parameters for at least 2 of the steps in the pipeline (i.e., you don't have to tune the DictVectorizer). Finally, pull it all together by trying different scaling methods as part of your analysis.
+
+

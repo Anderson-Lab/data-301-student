@@ -200,17 +200,23 @@ model.predict(X_new_sc)
 # TYPE YOUR CODE HERE
 # BEGIN SOLUTION
 # Read in the data.
+import pandas as pd
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_extraction import DictVectorizer
+
 tips = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv')
 
 # Define the features.
-features = ["total_bill","sex"]
+features = ["total_bill","sex","day"]
 
 # Define the training data.
 # Represent the features as a list of dicts.
 X_train_dict = tips[features].to_dict(orient="records")
 X_new_dict = [{
     "total_bill":40,
-    "sex":"Male"
+    "sex":"Male",
+    "day":"Sun"
 }]
 y_train = tips["tip"]
 

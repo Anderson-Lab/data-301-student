@@ -263,11 +263,12 @@ for i,k in enumerate([5,30,100]):
 
 # +
 # TYPE YOUR CODE HERE
-x_new = pd.Series([40,"Male"],index=["total_bill","sex"])
+# BEGIN SOLUTION
+x_new = pd.Series([40,"Male","Sun"],index=["total_bill","sex","day"])
 tips = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/tips.csv')
 display(tips.head())
 
-features = ["total_bill","sex"]
+features = ["total_bill","sex","day"]
 
 # Note that "Neighborhood" is a categorical variable.
 X_train = pd.get_dummies(tips[features])
@@ -300,6 +301,7 @@ def get_KNN_prediction(x_new_sc,k):
     return y_train.loc[inds_sorted].mean()
 
 get_KNN_prediction(x_new_sc,3),get_KNN_prediction(x_new_sc,10),get_KNN_prediction(x_new_sc,20)
+# END SOLUTION
 # -
 
 # **Challenge Exercise.** We visualized the $k$-nearest neighbors regression function above, in the special case where there is only one feature. It is also possible to visualize a regression function in the case where there are two features, using a heat map, where the two axes represent the two features and the color represents the label.
