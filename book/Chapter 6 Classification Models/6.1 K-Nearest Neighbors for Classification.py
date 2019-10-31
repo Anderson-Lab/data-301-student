@@ -171,6 +171,9 @@ model.classes_
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+
+# END SOLUTION
 # -
 
 # **Exercise 2.** Build a 5-nearest neighbors model to predict whether or not a passenger on a Titanic would survive, based on their age, sex, and class as features. Use the Titanic data set (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/titanic.csv`) as your training data. Then, use your model to predict whether a 20-year old female in first-class would survive. What about a 20-year old female in third-class?

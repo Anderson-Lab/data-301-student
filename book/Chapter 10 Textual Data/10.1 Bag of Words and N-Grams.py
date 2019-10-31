@@ -22,6 +22,7 @@
 # In data science, a text is typically called a **document**, even though a document can be anything from a text message to a full-length novel.  A collection of documents is called a **corpus**. In this chapter, we will work with a corpus of text messages, which contains both spam and non-spam ("ham") messages.
 
 # +
+# %matplotlib inline
 import pandas as pd
 pd.options.display.max_rows = 10
 
@@ -73,6 +74,59 @@ words
 
 words.apply(Counter)
 
+# ## CountVectorizer and Classification
+# Now we can put several of these concepts together from this book to see how well we can predict spam. First, we want to understand our data and the underlying distribution of values.
+
+(texts['label'].value_counts()/texts.shape[0]).plot.bar()
+
+# What the above graph shows us is that the percent of spam in our corpus is less than 20% of the data. We need to keep this in mind during evaluation. 
+#
+# The first thing that we need to incorporate into our pipeline is a vectorizer that performs the counting we described above. In ``sklearn``, we use ``CountVectorizer``. 
+
+texts['label'].value_counts()
+
+# +
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsClassifier
+
+print(__doc__)
+
+# #############################################################################
+# Define a pipeline combining a text feature extractor with a simple
+# classifier
+pipeline = Pipeline([
+    ('vect', CountVectorizer()),
+    ('clf', KNeighborsClassifier()),
+])
+
+# uncommenting more parameters will give better exploring power but will
+# increase processing time in a combinatorial way
+parameters = {
+    'vect__max_df': (0.5, 1.0),
+    # 'vect__max_features': (None, 5000, 10000, 50000),
+    'vect__ngram_range': ((1, 1), (1, 2)),  # unigrams or bigrams
+    'clf__n_neighbors': [10,30]
+}
+
+#from sklearn.model_selection import StratifiedKFold
+#skf = StratifiedKFold(n_splits=3)
+
+grid_search = GridSearchCV(pipeline, parameters, cv=3,
+                           n_jobs=-1, verbose=1,scoring='f1_macro')
+
+grid_search.fit(texts['text'], texts['label'])
+# -
+
+print("Best score: %0.3f" % grid_search.best_score_)
+print("Best parameters set:")
+best_parameters = grid_search.best_estimator_.get_params()
+for param_name in sorted(parameters.keys()):
+    print("\t%s: %r" % (param_name, best_parameters[param_name]))
+
+# **Notes about macro verus micro averaging** A macro-average will compute the metric independently for each class and then take the average (hence treating all classes equally), whereas a micro-average will aggregate the contributions of all classes to compute the average metric. 
+
 # ## N-Grams
 #
 # The problem with the bag of words representation is that the ordering of the words is lost. For example, the following sentences have the exact same bag of words representation, but convey different meanings:
@@ -111,20 +165,29 @@ words.apply(get_bigrams).apply(Counter)
 
 # # Exercises
 
-# **Exercise 1.** Read in the OKCupid data set (`/data301/data/okcupid/profiles.csv`). Convert the users' responses to `essay0` ("self summary") into a bag of words representation.
+# **Exercise 1.** Read in the OKCupid data set (`/data301/data/okcupid/profiles.csv`). You can get more information about this dataset at ``https://github.com/rudeboybert/JSE_OkCupid``. Convert the users' responses to `essay0` ("self summary") into a bag of words representation.
 #
 # (_Hint:_ Test your code on the first 100 users before testing it on the entire data set.)
 
-# +
 # TYPE YOUR CODE HERE.
-# -
+# BEGIN SOLUTION
+import pandas as pd
+okcupid = pd.read_csv('/data301/data/okcupid/profiles.csv')
+okcupid.head()
+# END SOLUTION
 
 # **Exercise 2.** The text of _Green Eggs and Ham_ by Dr. Seuss can be found in (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/drseuss/greeneggsandham.txt`). Read in this file and convert this "document" into a bag of trigrams (3-grams) representation. Which trigram appears most often? Some code has been provided to get you started.
 
 # TYPE YOUR CODE HERE.
 with open(
-    "https://raw.githubusercontent.com/dlsun/data-science-book/master/data/drseuss/greeneggsandham.txt",
+    "/data301/data/drseuss/greeneggsandham.txt",
     "r"
 ) as f:
     for line in f:
         pass
+
+# **Exercise 3 (Challenge Problem)** Consider the okcpid dataset. Train and hyperparameter tune a KNN model to predict the pet preferences.
+
+okcupid.pets.value_counts()
+
+

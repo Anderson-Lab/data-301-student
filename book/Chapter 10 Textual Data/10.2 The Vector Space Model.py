@@ -269,3 +269,94 @@ def predict_spam(new_text):
     
 print(predict_spam("meet you at jurong place"))
 print(predict_spam("free cash"))
+# -
+
+# **Exercise 5** The above statement about sklearn and cosine distance calculation can be more clearly stated that cosine similiarity is not a metric that can be used by accelerating structures like ball and kd trees with it. In newer version of sklearn, you can specify metric='cosine'. Modify the the code from 10.1 to use cosine.
+# <pre>
+# from sklearn.feature_extraction.text import CountVectorizer
+# from sklearn.model_selection import GridSearchCV
+# from sklearn.pipeline import Pipeline
+# from sklearn.neighbors import KNeighborsClassifier
+#
+# import pandas as pd
+# pd.options.display.max_rows = 10
+#
+# texts = pd.read_csv(
+#     "https://raw.githubusercontent.com/dlsun/data-science-book/master/data/SMSSpamCollection.txt", 
+#     sep="\t",
+#     names=["label", "text"]
+# )
+#
+# # #############################################################################
+# # Define a pipeline combining a text feature extractor with a simple
+# # classifier
+# pipeline = Pipeline([
+#     ('vect', CountVectorizer()),
+#     ('clf', KNeighborsClassifier()),
+# ])
+#
+# # uncommenting more parameters will give better exploring power but will
+# # increase processing time in a combinatorial way
+# parameters = {
+#     'vect__max_df': (0.5, 0.75, 1.0),
+#     # 'vect__max_features': (None, 5000, 10000, 50000),
+#     'vect__ngram_range': ((1, 1), (1, 2)),  # unigrams or bigrams
+#     'clf__n_neighbors': [5,10,30]
+# }
+#
+# grid_search = GridSearchCV(pipeline, parameters, cv=3,
+#                            n_jobs=-1, verbose=1,scoring='f1_macro')
+#
+# grid_search.fit(texts['text'], texts['label'])
+# </pre>
+
+# +
+# YOUR CODE HERE
+# BEGIN SOLUTION
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics.pairwise import cosine_similarity
+
+import pandas as pd
+pd.options.display.max_rows = 10
+
+texts = pd.read_csv(
+    "https://raw.githubusercontent.com/dlsun/data-science-book/master/data/SMSSpamCollection.txt", 
+    sep="\t",
+    names=["label", "text"]
+)
+
+# #############################################################################
+# Define a pipeline combining a text feature extractor with a simple
+# classifier
+    
+pipeline = Pipeline([
+    ('vect', CountVectorizer()),
+    ('clf', KNeighborsClassifier(metric='cosine')),
+])
+
+# uncommenting more parameters will give better exploring power but will
+# increase processing time in a combinatorial way
+parameters = {
+    'vect__max_df': (0.5,0.75),
+    # 'vect__max_features': (None, 5000, 10000, 50000),
+    'vect__ngram_range': ((1, 1), (1, 2)),  # unigrams or bigrams
+    'clf__n_neighbors': [5,10]
+}
+
+grid_search = GridSearchCV(pipeline, parameters, cv=3,
+                           n_jobs=-1, verbose=1,scoring='f1_macro')
+
+grid_search.fit(texts['text'], texts['label'])
+
+print("Best score: %0.3f" % grid_search.best_score_)
+print("Best parameters set:")
+best_parameters = grid_search.best_estimator_.get_params()
+for param_name in sorted(parameters.keys()):
+    print("\t%s: %r" % (param_name, best_parameters[param_name]))
+# END SOLUTION
+# -
+
+

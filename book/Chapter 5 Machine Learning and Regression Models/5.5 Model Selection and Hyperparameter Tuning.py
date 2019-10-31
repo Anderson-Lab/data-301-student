@@ -227,6 +227,53 @@ results
 
 results.pivot_table(index="regression__n_neighbors",columns="reduce_dim__n_components",values="mean_test_score").plot.bar()
 
+# ## Example below shows how to write a custom function transformer
+
+# +
+
+import numpy as np
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+from sklearn.neighbors import KNeighborsRegressor
+
+pipe = Pipeline([
+    ('pre',FunctionTransformer(validate=False)),
+    ('vec',DictVectorizer(sparse=False)),
+    # the reduce_dim stage is populated by the param_grid
+    ('reduce_dim', PCA()),
+    ('regression', KNeighborsRegressor())
+])
+
+## GRID SEARCH
+
+def func_features(df,features):
+    X_dict = df[features].to_dict(orient="records")
+    return X_dict
+
+FUNC_OPTIONS = [
+    lambda df: func_features(df,["Lot Area", "Gr Liv Area","Full Bath", "Half Bath","Bedroom AbvGr", "Year Built","Neighborhood"]),
+    lambda df: func_features(df,["Lot Area", "Gr Liv Area","Full Bath", "Half Bath","Bedroom AbvGr","Neighborhood"]),
+]
+
+#a = FunctionTransformer(func=FUNC_OPTIONS[0],validate=False)
+#a.fit(housing)
+
+N_FEATURES_OPTIONS = [2, 4, 8]
+k_OPTIONS = [1, 10, 100]
+param_grid = {
+        'pre__func': FUNC_OPTIONS,
+        'reduce_dim__n_components': N_FEATURES_OPTIONS,
+        'regression__n_neighbors': k_OPTIONS
+}
+
+grid = GridSearchCV(pipe, cv=5, n_jobs=1, param_grid=param_grid, iid=False,scoring='neg_mean_squared_error',return_train_score=True)
+grid.fit(housing, y)
+# -
+
+grid.cv_results_
+
 # # Exercises
 
 # # Exercise 1
