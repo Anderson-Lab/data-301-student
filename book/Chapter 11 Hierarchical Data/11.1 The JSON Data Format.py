@@ -41,6 +41,7 @@
 #
 # The `json` library in Python allows you to read a JSON file directly into a Python dict.
 
+import json
 with open("/data301/data/nyphil/complete.json") as f:
     nyphil = json.load(f)
 
@@ -82,7 +83,9 @@ from pandas.io.json import json_normalize
 pd.options.display.max_rows = 10
 
 works = json_normalize(nyphil["programs"], "works")
-works
+display(works)
+display(nyphil["programs"][0]["works"][0])
+display(works.columns)
 # -
 
 # Note that this flattening operation resulted in some loss of information. We no longer have information about the program that each work appeared in. We can partly alleviate this problem by specifying "metadata" from parent levels to append. For example, "season" and "orchestra" are properties of "program", which is the parent of "work". If we want to include these variables with each work, then we pass them to the `meta=` argument of `json_normalize()`.

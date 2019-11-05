@@ -83,7 +83,7 @@ tree.getroot()
 # If the XML data is already stored as a string in memory, then we instead use the `.fromstring()` method. Note that `.fromstring()` returns the root tag directly.
 
 # +
-with open("/data301/data/nyphil.xml", "rb") as f:
+with open("/data301/data/nyphil/complete.xml", "rb") as f:
     string = f.read()
     
 etree.fromstring(string)
