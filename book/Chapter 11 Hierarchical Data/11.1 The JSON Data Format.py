@@ -184,36 +184,82 @@ starships
 
 # +
 # ENTER YOUR CODE HERE.
+# BEGIN SOLUTION
+import json
+with open("/data301/data/nyphil/complete.json") as f:
+    nyphil = json.load(f)
+    
+c = 0
+for i in range(len(nyphil['programs'])):
+    for j in range(len(nyphil['programs'][i]['works'])):
+        for k in range(len(nyphil['programs'][i]['works'][j]['soloists'])):
+            if nyphil['programs'][i]['works'][j]['soloists'][k]['soloistName'] == "Goodman, Benny":
+                c+=1
+print(c)
+# END SOLUTION
 # -
 
 # **Exercise 2.** What is the most frequent start time for New York Philharmonic concerts?
 
-# +
 # ENTER YOUR CODE HERE.
-# -
+# BEGIN SOLUTION
+from pandas.io.json import json_normalize
+concerts = json_normalize(nyphil["programs"], "concerts")
+concerts.Time.value_counts()
+# END SOLUTION
 
 # **Exercise 3.** How many total concerts did the New York Philharmonic perform in the 2014-15 season?
 
-# +
 # ENTER YOUR CODE HERE.
-# -
+# BEGIN SOLUTION
+from pandas.io.json import json_normalize
+concerts = json_normalize(nyphil["programs"], "concerts",meta=['season'])
+concerts.pivot_table(index='season',columns='Time',aggfunc='count').loc['2014-15'].sum()
+# END SOLUTION
 
 # To answer Exercises 4-6, you will need to issue HTTP requests to the Open States API, which contains information about state legislatures. You will need to include an API key with every request. You can [register for an API key here](https://openstates.org/api/register/). Once you have an API key, enter your API key below. If your API key works, then the code below should produce a `DataFrame` of all of the committees in the California State Assembly (the lower chamber).
 
+# # I'm making this extra credit. If they can make decent progress on any of them, then it's +1 to their score. The API is just too damn annoying.
+
+# +
 # This is just a sample request to test that your API key is working.
+import requests
+import pandas as pd
+
 apikey = ""
+# BEGIN SOLUTION
+apikey = "27fbd87e-a817-45f5-a844-7768daffba2d"
+# END SOLUTION
+headers = {
+    'X-API-KEY': apikey
+}
 resp = requests.get(
-    "https://openstates.org/api/v1/committees/?state=ca&chamber=lower&apikey=%s" % apikey
+    "https://openstates.org/api/v1/legislators/?state=nc&chamber=lower", headers=headers
 )
 pd.DataFrame(resp.json())
+#pd.DataFrame(resp.json())
+# -
 
 # To answer the questions below, you will need to issue your own HTTP requests to the API. To understand how to construct URLs, you will need to refer to the [documentation for this API](http://docs.openstates.org/en/latest/api/).
 
 # **Exercise 4.** Legislators typically have offices in both the Capitol building and in their districts. Among the active legislators in the California Assembly (lower chamber), which legislators have the most offices (and how many do they have)?
 
-# +
 # ENTER YOUR CODE HERE.
-# -
+# BEGIN SOLUTION
+apikey = "27fbd87e-a817-45f5-a844-7768daffba2d"
+# END SOLUTION
+headers = {
+    'X-API-KEY': apikey
+}
+resp = requests.get(
+    "https://openstates.org/api/v1/legislators/?state=ca&chamber=lower", headers=headers
+)
+offices = json_normalize(resp.json(), "offices", meta=['active','full_name'])
+pivot_df = offices.pivot_table(index="full_name",columns="active",aggfunc='count',values='address')
+display(pivot_df.iloc[:,0].sort_values(ascending=False))
+# END SOLUTION
+
+df['offices']
 
 # **Exercise 5.** Get all of the _constitutional amendments_ in the California State Senate (upper house) from the current legislative session. How many amendments have there been?
 #
@@ -221,9 +267,67 @@ pd.DataFrame(resp.json())
 
 # +
 # ENTER YOUR CODE HERE.
+# BEGIN SOLUTION
+# This is just a sample request to test that your API key is working.
+import requests
+import pandas as pd
+
+apikey = ""
+# BEGIN SOLUTION
+apikey = "27fbd87e-a817-45f5-a844-7768daffba2d"
+# END SOLUTION
+headers = {
+    'X-API-KEY': apikey
+}
+
+pages = []
+c=1
+max_pages = 10000
+while True:
+    resp = requests.get(
+        "https://openstates.org/api/v1/bills/?state=nd&page=%d&chamber=upper&session=20182019"%c, headers=headers
+    )
+
+    pages.extend(resp.json())
+    c+=1
+    print(c)
+    if c > max_pages:
+        break
+
+# END SOLUTION
 # -
+
+pages[:1]
+
+# BEGIN SOLUTION
+json_normalize(pages,'type')[0].value_counts()
+#json_normalize(pages)
+# END SOLUTION
 
 # **Exercise 6.** Look up the votes on the constitutional amendments you found in Exercise 5. Calculate the number of "yes" and "no" votes for each legislator on these amendments. Which legislator had the most total votes on constitutional amendments in the current session? Which legislator had the most total negative votes?
 
-# +
 # ENTER YOUR CODE HERE.
+# BEGIN SOLUTION
+df = json_normalize(pages,'type',meta=['id'])
+df.columns = ["type","id","votes"]
+ca_df = df.loc[df.type == 'constitutional amendment',:]
+ca_df
+# END SOLUTION
+
+df = json_normalize(pages)
+df
+
+json_normalize(pages).columns#,'votes')
+
+# BEGIN SOLUTION
+apikey = "27fbd87e-a817-45f5-a844-7768daffba2d"
+# END SOLUTION
+headers = {
+    'X-API-KEY': apikey
+}
+resp = requests.get(
+    "https://openstates.org/api/v1/legislators/?state=ca&chamber=lower", headers=headers
+)
+json_normalize(resp.json()).columns
+
+

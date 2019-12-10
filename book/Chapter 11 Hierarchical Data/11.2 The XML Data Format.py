@@ -74,6 +74,8 @@ from lxml import etree
 
 # First, let's read in the data using `lxml`. The `.parse()` function of ElementTree reads in an XML document from a file or URL and returns a tree-like data structure called an ElementTree.
 
+# !head /data301/data/nyphil/complete.xml
+
 tree = etree.parse("/data301/data/nyphil/complete.xml")
 
 # Every XML document has a single "root" tag that encloses all of the other tags. For the New York Philharmonic data, this root tag is `<programs>`.
@@ -169,6 +171,8 @@ for soloist in soloists:
     row["composerName"] = soloist.xpath("ancestor::work//composerName")[0].text
     rows.append(row)
     
+print(rows[:5])
+    
 soloistsdf = pd.DataFrame(rows)
 soloistsdf
 # -
@@ -197,25 +201,41 @@ etree.fromstring(resp.content)
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+from lxml import etree
+import pandas as pd
+
+tree = etree.parse("/data301/data/nyphil/complete.xml")
+
+concerts = tree.xpath("/programs/program/concertInfo")
+times = []
+for concert in concerts:
+    times.append(concert.find("Time").text)
+df = pd.DataFrame({"time":times})
+df["time"].value_counts()
+# END SOLUTION
 # -
+
+programs
 
 # **Exercise 2.** How many total concerts did the New York Philharmonic perform in the 2014-15 season?
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+from lxml import etree
+import pandas as pd
+
+tree = etree.parse("/data301/data/nyphil/complete.xml")
+
+seasons = tree.xpath("/programs/program/season")
+c = 0
+for season in seasons:
+    if season.text == "2014-15":
+        c+=1
+print(c)
+print('This does not match up, but I am not sure why at the moment. If they have something that pulls out the season, then it is good in my books')
+# END SOLUTION
 # -
 
-# In Exercises 3-4, you will work with [APIXU](https://www.apixu.com/), an weather API. This API returns data in both JSON and XML formats. In these exercises, you should request the data to be returned in XML format.
-#
-# Register with the website to obtain an API key. You will likely need to refer to [the API documentation here](https://www.apixu.com/doc/). If you run into unexpected errors, issue the HTTP request from your browser to make sure that the data is in the format you expect.
 
-# **Exercise 3.** Get the forecasted low (min) and high (max) temperatures (in Fahrenheit) for the next 7 days in San Luis Obispo. Make a graphic that displays this information.
-
-# +
-# TYPE YOUR CODE HERE
-# -
-
-# **Exercise 4.** Get the hourly wind speed (in mph) for the past 7 days. (_Note:_ This will require making 7 HTTP requests to the API. Try to do it programmatically.) You should end up with $24 \times 7 = 168$ rows in your `DataFrame`. Make a plot of the wind speed as a function of time. What do you notice?
-
-# +
-# TYPE YOUR CODE HERE

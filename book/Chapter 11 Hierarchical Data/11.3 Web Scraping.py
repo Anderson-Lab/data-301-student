@@ -63,12 +63,16 @@ table
 # You are encouraged to add `print()` statements inside the `for` loop to check your understanding of each line of code.
 
 rows = []
-for faculty in table.find_all("tr")[1:]:
+for i,faculty in enumerate(table.find_all("tr")[1:]):
+    print(i)
     # Get all the cells in the row.
     cells = faculty.find_all("td")
     
-    # The information we need is the text between tags.
-    name = cells[0].find("strong").text
+    try:
+        # The information we need is the text between tags.
+        name = cells[0].find("strong").text
+    except:
+        name = cells[0].text
     
     link = cells[1].find("a")
     office = cells[1].text if link is None else link.text
@@ -106,5 +110,39 @@ pd.DataFrame(rows)
 # - How many 300-level courses does the Statistics department offer?
 # - How many distinct courses are offered in Spring quarter?
 
-# +
 # YOUR CODE HERE
+# BEGIN SOLUTION
+import requests
+import pandas as pd
+resp = requests.get("http://catalog.calpoly.edu/collegesandprograms/collegeofsciencemathematics/statistics/#courseinventory")
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(resp.content, "html.parser")
+divs = soup.find_all("div", {"class": "courseblock"})
+print(len(divs))
+records = []
+c = 0
+spring = 0
+for div in divs:
+    texts = div.find("strong").text[:8]
+    record = {}
+    record["name"] = texts[:4]
+    record["number"] = int(texts[5:9])
+    if texts[5] == "3":
+        c+=1
+    text = div.find("div",{"class": "noindent courseextendedwrap"}).find("p").text.split(":")
+    if len(text) == 2:
+        terms = [s.strip() for s in text[1].split(",")]
+        for term in terms:
+            record[term] = 1
+        if "SP" in [s.strip() for s in text[1].split(",")]:
+            spring+=1
+    records.append(record)
+print("Number of 300 level courses",c)
+print("Number of courses in the spring",spring)
+df = pd.DataFrame(records)
+import numpy as np
+print(np.sum((df.number >= 300) & (df.number < 400)))
+print(int(np.sum(df.SP)))
+# END SOLUTION
+
+

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -99,7 +100,7 @@ accuracy_score(y_train, y_train_pred)
 # while the recall is the proportion of observations in class $c$ that are positives (as opposed to negatives):
 # $$ \textrm{recall for class } c = \frac{TP}{TP + FN}. $$
 #
-# The diagram below may help you to remember which numbers go in the numerator and denominator. The precision is the proportion of the red rectangle that is a TP, while the recall is the proportion of the red circle that is a TP.
+# The diagram below may help you to remember which numbers go in the numerator and denominator. The recall is the proportion of the red rectangle that is a TP, while the precision is the proportion of the red circle that is a TP.
 #
 # ![](precision_recall.png)
 
@@ -215,12 +216,94 @@ cross_val_score(pipeline, X_train, is_red_train,
 
 # +
 # TYPE YOUR CODE HERE.
+# BEGIN SOLUTION
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import precision_score, accuracy_score, recall_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+import pandas as pd
+from sklearn.feature_extraction import DictVectorizer
+
+df = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/titanic.csv')
+
+# define the training data
+cols = ["age","sex","pclass"]
+X_train = df[cols]
+y_train = df["survived"]
+
+# convert categorical variables to dummy variables
+vec = DictVectorizer(sparse=False)
+X_train = X_train.to_dict(orient='records')
+vec.fit(X_train)
+X_train = pd.DataFrame(vec.transform(X_train)).fillna(0)
+X_train.columns = vec.get_feature_names()
+
+# fit the 5-nearest neighbors model
+model = KNeighborsClassifier(n_neighbors=5)
+scaler = StandardScaler()
+
+pipeline = Pipeline([
+    ("scaler", scaler),
+    ("model", model)
+])
+
+y_train = df["survived"]
+pipeline.fit(X_train,y_train)
+
+y_train_pred = pipeline.predict(X_train)
+
+print("Accuracy",accuracy_score(y_train, y_train_pred))
+print("Precision",precision_score(y_train, y_train_pred))
+print("Recall",recall_score(y_train, y_train_pred))
+
+# END SOLUTION
 # -
 
 # **Exercise 2.** Estimate the _test_ accuracy, precision, and recall of your model from Exercise 1 for survivors.
 
 # +
 # TYPE YOUR CODE HERE.
+# BEGIN SOLUTION
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import precision_score, accuracy_score, recall_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+import pandas as pd
+from sklearn.feature_extraction import DictVectorizer
+
+df = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/titanic.csv')
+
+# define the training data
+cols = ["age","sex","pclass"]
+X_train = df[cols]
+y_train = df["survived"]
+
+# convert categorical variables to dummy variables
+vec = DictVectorizer(sparse=False)
+X_train = X_train.to_dict(orient='records')
+vec.fit(X_train)
+X_train = pd.DataFrame(vec.transform(X_train)).fillna(0)
+X_train.columns = vec.get_feature_names()
+
+# fit the 5-nearest neighbors model
+model = KNeighborsClassifier(n_neighbors=5)
+scaler = StandardScaler()
+
+pipeline = Pipeline([
+    ("scaler", scaler),
+    ("model", model)
+])
+
+y_train = df["survived"]
+
+
+print("Accuracy",cross_val_score(pipeline, X_train, y_train, cv=10, scoring="accuracy").mean())
+print("Precision",cross_val_score(pipeline, X_train, y_train, cv=10, scoring="precision").mean())
+print("Recall",cross_val_score(pipeline, X_train, y_train, cv=10, scoring="recall").mean())
+
+# END SOLUTION
 # -
 
 # **Exercise 3.** You want to build a $k$-nearest neighbors model to predict where a Titanic passenger embarked, using their age, sex, and class. 
@@ -232,3 +315,61 @@ cross_val_score(pipeline, X_train, is_red_train,
 
 # +
 # TYPE YOUR CODE HERE.
+# BEGIN SOLUTION
+# %matplotlib inline
+import numpy as np
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsRegressor
+
+pipe = Pipeline([
+    ('vec',DictVectorizer(sparse=False)),
+    ('scaler', StandardScaler()),
+    ('model', KNeighborsClassifier())
+])
+
+## GRID SEARCH
+
+k_OPTIONS = [3, 10, 25, 50]
+param_grid = {
+        'model__n_neighbors': k_OPTIONS
+}
+
+grid = GridSearchCV(pipe, cv=5, n_jobs=1, param_grid=param_grid,scoring='f1_micro')
+
+df = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/titanic.csv')
+
+# define the training data
+cols = ["age","sex","pclass"]
+X_train = df[cols]
+X_train.loc[:,"age"] = X_train["age"].fillna(X_train["age"].mean())
+X_train.loc[:,"pclass"] = X_train["pclass"].fillna(X_train["pclass"].mode())
+X_train.loc[:,"sex"] = X_train["sex"].fillna(X_train["sex"].mode())
+y_train = df["embarked"]
+y_train = y_train.fillna(y_train.value_counts().sort_values().index[0])
+print(y_train.value_counts())
+
+grid.fit(X_train.to_dict(orient="records"), y_train)
+
+results = pd.DataFrame(grid.cv_results_['params'])
+mean_scores = np.array(grid.cv_results_['mean_test_score'])
+results.loc[:,"mean_test_score"] = mean_scores
+
+results.groupby("model__n_neighbors").mean().plot.bar()
+
+from sklearn.metrics import f1_score, make_scorer
+#sklearn.metrics.f1_score(y_true, y_pred, labels=None, pos_label=1, average=’binary’, sample_weight=None)
+scorer = make_scorer(f1_score, labels='S',average=None)
+
+grid = GridSearchCV(pipe, cv=5, n_jobs=1, param_grid=param_grid,scoring=scorer)
+grid.fit(X_train.to_dict(orient="records"), y_train)
+
+results = pd.DataFrame(grid.cv_results_['params'])
+mean_scores = np.array(grid.cv_results_['mean_test_score'])
+results["mean_test_score"] = mean_scores
+
+results.groupby("model__n_neighbors").mean().plot.bar()
+# END SOLUTION
+# -
+
+

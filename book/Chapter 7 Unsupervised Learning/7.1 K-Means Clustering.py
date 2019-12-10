@@ -150,7 +150,8 @@ model.fit(X_train)
 centroids = model.cluster_centers_
 clusters = model.labels_
 
-clusters
+display(centroids)
+display(clusters)
 
 # +
 # Map the cluster numbers to colors.
@@ -203,34 +204,166 @@ X_train.plot.scatter(x="PetalLength", y="PetalWidth",
 #
 # _Hint:_ Don't forget to standardize your variables first!
 
+# +
 # TYPE YOUR CODE HERE.
+import pandas as pd
+from sklearn.cluster import KMeans
+
 red = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/"
                   "master/data/wines/reds.csv", sep=";")
 white = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/"
                     "master/data/wines/whites.csv", sep=";")
 wines = pd.concat([red, white], ignore_index=True)
+# BEGIN SOLUTION
+y = pd.Series(["red" for i in range(red.shape[0])] + ["white" for i in range(white.shape[0])])
+display(wines.head())
+display(y)
+
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+scaler.fit(wines)
+X_train_std = scaler.transform(wines)
+
+model = KMeans(n_clusters=2)
+model.fit(X_train_std)
+
+clusters = pd.Series(model.labels_).map({
+    0: "r",
+    1: "b",
+    2: "y"
+})
+
+wines_plot = wines.copy()
+wines_plot["type"] = y
+wines_plot["cluster"] = clusters
+
+import altair as alt
+alt.data_transformers.disable_max_rows()
+
+alt.Chart(wines_plot).mark_point(size=60).encode(
+    x='fixed acidity',
+    y='volatile acidity',
+    color='cluster:N',
+    shape=alt.Shape('type', scale=alt.Scale(range=['cross', 'circle', 'square', 'triangle-right', 'diamond']))
+)
+
+# END SOLUTION
+# -
 
 
 # **Exercise 2.** Use $k$-means to cluster the Titanic passengers (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/titanic.csv`) into $k$ clusters. You are free to choose the number of clusters $k$ and the features to include (but be sure to include both categorical and quantitative features). Look at the profiles of the passengers in each cluster. Can you come up with an "interpretation" of each cluster based on the passengers in it?
 
+df.head()
+
 # +
 # TYPE YOUR CODE HERE.
+# BEGIN SOLUTION
+import pandas as pd
+from sklearn.cluster import KMeans
+
+df = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/titanic.csv")
+df.head()
+
+X = pd.get_dummies(df.drop(["survived","name","body","home.dest"],axis=1)).fillna(0)
+
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+scaler.fit(X)
+X_train_std = scaler.transform(X)
+
+model = KMeans(n_clusters=2)
+model.fit(X_train_std)
+# END SOLUTION
 # -
+
+X_train_std_df = pd.DataFrame(X_train_std)
+X_train_std_df.columns = X.columns
+X_train_std_df["survived"] = df["survived"]
+X_train_std_df["cluster"] = model.labels_
+
+pd.Series(model.labels_).value_counts()
+
+# %matplotlib inline
+X_train_std_df.groupby("cluster")["fare"].plot.density(legend=True)
+
+X_train_std_df.groupby("cluster")["survived"].value_counts().unstack().plot.bar(legend=True)
 
 # **Exercise 3.** The code below reads in the "two moons" dataset, a synthetic dataset that is used to evaluate clustering algorithms. What should be the two clusters be _intuitively_? What do you think $k$-means will return as the clusters? Once you have a hypothesis, test it out by fitting the model to this dataset and plotting the resulting clusters.
 
+# +
 # TYPE YOUR CODE HERE
 moons = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/"
                     "master/data/two_moons.csv")
 moons.plot.scatter(x="x1", y="x2", color="k")
+# BEGIN SOLUTION
+from sklearn.preprocessing import StandardScaler
+X_train = moons[["x1","x2"]]
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_std = scaler.transform(X_train)
+
+model = KMeans(n_clusters=2)
+model.fit(X_train_std)
+
+clusters = pd.Series(model.labels_).map({
+    0: "r",
+    1: "b",
+    2: "y"
+})
+
+df_plot = X_train.copy()
+df_plot["cluster"] = clusters
+
+import altair as alt
+alt.data_transformers.disable_max_rows()
+
+alt.Chart(df_plot).mark_point(size=60).encode(
+    x='x1',
+    y='x2',
+    color='cluster:N'
+)
+# END SOLUTION
+# -
 
 # **Exercise 4.** The code below reads in the "satellite" dataset, a synthetic dataset that is used to evaluate clustering algorithms. What should the two clusters be _intuitively_? What will the clusters be if you ask $k$-means to cluster this data into 2 clusters? Once you have a hypothesis, test it out by running $k$-means on this dataset.
 
+# +
 # TYPE YOUR CODE HERE
 satellite = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/"
                         "master/data/satellite.csv")
 satellite.plot.scatter(x="x1", y="x2", color="k")
 
+# BEGIN SOLUTION
+from sklearn.preprocessing import StandardScaler
+X_train = satellite[["x1","x2"]]
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_std = scaler.transform(X_train)
+
+model = KMeans(n_clusters=2)
+model.fit(X_train_std)
+
+clusters = pd.Series(model.labels_).map({
+    0: "r",
+    1: "b",
+    2: "y"
+})
+
+df_plot = X_train.copy()
+df_plot["cluster"] = clusters
+
+import altair as alt
+alt.data_transformers.disable_max_rows()
+
+alt.Chart(df_plot).mark_point(size=60).encode(
+    x='x1',
+    y='x2',
+    color='cluster:N'
+)
+# END SOLUTION
+# -
 
 # **Challenge Exercise.** Write a function, `get_kmeans_clusters`, that takes in a `DataFrame` and a number of clusters, and returns a `Series` containing the cluster assignment of each observation (row).
 

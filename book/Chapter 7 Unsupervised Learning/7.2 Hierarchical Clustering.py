@@ -156,3 +156,86 @@ moons.plot.scatter(x="x1", y="x2", color="k")
 # TYPE YOUR CODE HERE
 satellite = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/satellite.csv")
 satellite.plot.scatter(x="x1", y="x2", color="k")
+
+# +
+# TYPE YOUR CODE HERE
+import pandas as pd
+satellite = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/"
+                        "master/data/satellite.csv")
+satellite.plot.scatter(x="x1", y="x2", color="k")
+
+# BEGIN SOLUTION
+from sklearn.preprocessing import StandardScaler
+X_train = satellite[["x1","x2"]]
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_std = scaler.transform(X_train)
+
+from sklearn.cluster import AgglomerativeClustering
+
+model = AgglomerativeClustering(n_clusters=3, 
+                                affinity="euclidean",
+                                linkage="complete")
+model.fit(X_train)
+clusters = model.labels_
+
+clusters = pd.Series(clusters).map({
+    0: "r",
+    1: "b",
+    2: "y"
+})
+
+df_plot = X_train.copy()
+df_plot["cluster"] = clusters
+
+import altair as alt
+alt.data_transformers.disable_max_rows()
+
+alt.Chart(df_plot).mark_point(size=60).encode(
+    x='x1',
+    y='x2',
+    color='cluster:N'
+)
+# END SOLUTION
+
+# +
+# TYPE YOUR CODE HERE
+moons = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/"
+                    "master/data/two_moons.csv")
+moons.plot.scatter(x="x1", y="x2", color="k")
+# BEGIN SOLUTION
+from sklearn.preprocessing import StandardScaler
+X_train = moons[["x1","x2"]]
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_std = scaler.transform(X_train)
+
+from sklearn.cluster import AgglomerativeClustering
+
+model = AgglomerativeClustering(n_clusters=2, 
+                                affinity="euclidean",
+                                linkage="complete")
+model.fit(X_train)
+clusters = model.labels_
+
+clusters = pd.Series(clusters).map({
+    0: "r",
+    1: "b",
+    2: "y"
+})
+
+df_plot = X_train.copy()
+df_plot["cluster"] = clusters
+
+import altair as alt
+alt.data_transformers.disable_max_rows()
+
+alt.Chart(df_plot).mark_point(size=60).encode(
+    x='x1',
+    y='x2',
+    color='cluster:N'
+)
+# END SOLUTION
+# -
+
+

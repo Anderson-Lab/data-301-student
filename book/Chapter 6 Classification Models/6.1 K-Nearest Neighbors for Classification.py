@@ -121,6 +121,8 @@ from sklearn.neighbors import KNeighborsClassifier
 X_train = wines[["volatile acidity", "total sulfur dioxide"]]
 y_train = wines["color"]
 
+X_train_sc = (X_train - X_train.mean()) / X_train.std()
+
 # standardize the data
 scaler = StandardScaler()
 scaler.fit(X_train)
@@ -165,6 +167,7 @@ model.classes_
 # - alcohol: 9.8
 # - quality: 6
 #
+#
 # Now, build a 15-nearest neighbors classifier using all of the features in the data set. Use this new model to predict the color of the same wine above.
 #
 # Does the predicted label change? Do the predicted probabilities of the labels change?
@@ -172,6 +175,47 @@ model.classes_
 # +
 # TYPE YOUR CODE HERE
 # BEGIN SOLUTION
+# %matplotlib inline
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+
+import numpy as np
+import pandas as pd
+pd.options.display.max_rows = 5
+
+reds = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/wines/reds.csv",
+                   sep=";")
+whites = pd.read_csv("https://raw.githubusercontent.com/dlsun/data-science-book/master/data/wines/whites.csv", 
+                     sep=";")
+
+reds["color"] = "red"
+whites["color"] = "white"
+
+wines = pd.concat([reds, whites], 
+                  ignore_index=True)
+wines
+
+# define the training data
+X_train = wines[["fixed acidity","volatile acidity","citric acid","residual sugar","chlorides",
+                "free sulfur dioxide","total sulfur dioxide","density","pH","sulphates","alcohol","quality"]]
+y_train = wines["color"]
+
+X_train_sc = (X_train - X_train.mean()) / X_train.std()
+
+x_new = pd.Series(index=X_train.columns)
+x_new.loc[x_new.index] = [11,0.3,0.3,2,0.08,17,60,1.0,3.2,0.6,9.8,6]
+
+x_new_sc = (x_new - X_train.mean()) / X_train.std()
+display(x_new_sc)
+
+dists = np.sqrt(((X_train_sc - x_new_sc) ** 2).sum(axis=1))
+dists_sorted = dists.sort_values()
+display(dists_sorted)
+
+print("15 neighbors")
+inds_nearest = dists_sorted.index[:15]
+display(wines.loc[inds_nearest, "color"].value_counts())
 
 # END SOLUTION
 # -
@@ -180,3 +224,45 @@ model.classes_
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+from sklearn.feature_extraction import DictVectorizer
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv('https://raw.githubusercontent.com/dlsun/data-science-book/master/data/titanic.csv')
+
+# define the training data
+cols = ["age","sex","pclass"]
+X_train = df[cols]
+y_train = df["survived"]
+
+
+# convert categorical variables to dummy variables
+vec = DictVectorizer(sparse=False)
+X_train = X_train.to_dict(orient='records')
+vec.fit(X_train)
+X_train = pd.DataFrame(vec.transform(X_train))
+
+X_train_sc = (X_train - X_train.mean()) / X_train.std()
+
+x_new = pd.Series(index=cols)
+x_new.loc[x_new.index] = [20,"female",1]
+
+x_new = pd.DataFrame(vec.transform(x_new.to_dict()))
+
+x_new_sc = (x_new - X_train.mean()) / X_train.std()
+display(x_new_sc)
+
+dists = np.sqrt(((X_train_sc - x_new_sc.loc[0]) ** 2).sum(axis=1))
+dists_sorted = dists.sort_values()
+display(dists_sorted)
+
+print("5 neighbors")
+inds_nearest = dists_sorted.index[:5]
+display(df.loc[inds_nearest, "survived"].value_counts())
+# END SOLUTION
+# -
+vec.get_feature_names()
+
+
+

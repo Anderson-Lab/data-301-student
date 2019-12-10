@@ -228,15 +228,32 @@ for i, text in sms["text"][most_similar.index[:10]].items():
 
 # **Exercise 1.** Suppose we had instead compared documents using cosine similarity on the term frequencies (TF), instead of TF-IDF. Which text messages would be most similar to message 0 now?
 
-# +
 # TYPE YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+a = tf_sparse[0, :]
+B = tf_sparse
+dot = a.multiply(B).sum(axis=1)
+a_len = np.sqrt(a.multiply(a).sum())
+b_len = np.sqrt(B.multiply(B).sum(axis=1))
+cos_similarities = pd.DataFrame(dot / (a_len * b_len))[0]
+most_similar = cos_similarities.sort_values(ascending=False)
+display(most_similar)
+display(sms.iloc[[0]])
+display(sms.iloc[[most_similar.index[1]]])
+# END SOLUTIOM
 
 # **Exercise 2.** Suppose we had instead used Euclidean distance on the TF-IDF weights. Which text messages would be most similar to message 0 now?
 
-# +
 # TYPE YOUR CODE HERE
-# -
+# BEGIN SOLUTION
+B = pd.DataFrame.sparse.from_spmatrix(tf_idf_sparse).head(1000)
+a = B.loc[0]
+euc_similarities = np.sqrt(((B-a)**2).apply(lambda x: np.sum(x),axis=1)) #pd.DataFrame(dot / (a_len * b_len))[0]
+most_similar = euc_similarities.sort_values(ascending=True)
+display(most_similar)
+display(sms.iloc[[0]])
+display(sms.iloc[[most_similar.index[1]]])
+# END SOLUTION
 
 # **Exercise 3.** Suppose we normalize the length of each TF-IDF vector
 #
@@ -248,6 +265,18 @@ for i, text in sms["text"][most_similar.index[:10]].items():
 
 # +
 # TYPE YOUR CODE HERE
+# BEGIN SOLUTION
+B = pd.DataFrame.sparse.from_spmatrix(tf_idf_sparse).head(1000)
+B = B.apply(lambda x: x/np.sqrt((x**2).sum()),axis=1)
+a = B.loc[0]
+euc_similarities = np.sqrt(((B-a)**2).apply(lambda x: np.sum(x),axis=1)) #pd.DataFrame(dot / (a_len * b_len))[0]
+most_similar = euc_similarities.sort_values(ascending=True)
+display(most_similar)
+display(sms.iloc[[0]])
+display(sms.iloc[[most_similar.index[1]]])
+
+print("TYPO NOTE: I believe this question should read 'before calculating cosine similarity distance'. Full credit if they did the normalization.")
+# END SOLUTION
 # -
 
 # **Exercise 4.** Write a function `predict_spam()` that takes in a new text message and predicts whether or not it is spam using $9$-nearest neighbors on the text messages data set above. Some code has been provided for you. Use cosine distance ($= 1 - \text{cosine similarity}$) as your distance metric. (Because `KNeighborsClassifier` in Scikit-Learn does not support cosine distance, you will have to implement $k$-nearest neighbors from scratch.)
@@ -267,8 +296,26 @@ def predict_spam(new_text):
     x_new = vec.transform([new_text])[0, :]
     raise NotImplementedError
     
+# BEGIN SOLUTION
+def predict_spam(new_text):
+    # Get the TF-IDF vector for the new text.
+    a = vec.transform([new_text])[0, :]
+    B = X_train
+    dot = a.multiply(B).sum(axis=1)
+    a_len = np.sqrt(a.multiply(a).sum())
+    b_len = np.sqrt(B.multiply(B).sum(axis=1))
+    cos_similarities = 1-pd.DataFrame(dot / (a_len * b_len))[0]
+    most_similar = cos_similarities.sort_values(ascending=True)
+    print("It seems like 9 nearest neighbors both result in ham, so I changed to 15")
+    inds_nearest = most_similar.index[:15]
+    print(y_train.loc[inds_nearest])
+    return y_train.loc[inds_nearest].mode()
+# END SOLUTION
+
 print(predict_spam("meet you at jurong place"))
 print(predict_spam("free cash"))
+
+
 # -
 
 # **Exercise 5** The above statement about sklearn and cosine distance calculation can be more clearly stated that cosine similiarity is not a metric that can be used by accelerating structures like ball and kd trees with it. In newer version of sklearn, you can specify metric='cosine'. Modify the the code from 10.1 to use cosine.

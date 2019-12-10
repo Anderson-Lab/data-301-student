@@ -169,25 +169,133 @@ words.apply(get_bigrams).apply(Counter)
 #
 # (_Hint:_ Test your code on the first 100 users before testing it on the entire data set.)
 
+# +
 # TYPE YOUR CODE HERE.
 # BEGIN SOLUTION
 import pandas as pd
+from collections import Counter
+
 okcupid = pd.read_csv('/data301/data/okcupid/profiles.csv')
-okcupid.head()
+display(okcupid.head())
+
+words = (
+    okcupid["essay0"].
+    str.lower().
+    str.replace("[^\w\s]", "").
+    str.split()
+)
+df = pd.DataFrame({"words":words})
+df.loc[:,"words"] = df.loc[:,"words"].fillna("")
+
+counts = df["words"].apply(Counter)
+display(counts)
 # END SOLUTION
+# -
 
 # **Exercise 2.** The text of _Green Eggs and Ham_ by Dr. Seuss can be found in (`https://raw.githubusercontent.com/dlsun/data-science-book/master/data/drseuss/greeneggsandham.txt`). Read in this file and convert this "document" into a bag of trigrams (3-grams) representation. Which trigram appears most often? Some code has been provided to get you started.
 
+# +
 # TYPE YOUR CODE HERE.
+# BEGIN SOLUTION
+import pandas as pd
+from collections import Counter
+from sklearn.feature_extraction import DictVectorizer
+
+lines = []
+
 with open(
     "/data301/data/drseuss/greeneggsandham.txt",
     "r"
 ) as f:
     for line in f:
-        pass
+        lines.append(line)
+        
+df = pd.DataFrame({"line":lines})
+
+def get_trigrams(words):
+    # We need to line up the words as follows:
+    #   words[0], words[1]
+    #   words[1], words[2]
+    #       ... ,  ...
+    # words[n-1], words[n]
+    return zip(words[:-2], words[1:-1], words[2:])
+
+words = (
+    df["line"].
+    str.lower().
+    str.replace("[^\w\s]", "").
+    str.split()
+)
+
+trigrams = words.apply(get_trigrams).apply(Counter)
+
+vec = DictVectorizer(sparse=False)
+vec.fit(trigrams)
+as_df = pd.DataFrame(vec.transform(trigrams))
+as_df.columns = vec.get_feature_names()
+summed = as_df.sum()
+index = summed.idxmax()
+import numpy as np
+ix = np.where(summed.index == index)[0]
+display(index)
+display(summed.iloc[ix])
+# END SOLUTION
+# -
 
 # **Exercise 3 (Challenge Problem)** Consider the okcpid dataset. Train and hyperparameter tune a KNN model to predict the pet preferences.
 
-okcupid.pets.value_counts()
+# +
+# TYPE YOUR CODE HERE.
+# BEGIN SOLUTION
+# %matplotlib inline
+
+import pandas as pd
+from collections import Counter
+import numpy as np
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.feature_extraction.text import CountVectorizer
+
+okcupid = pd.read_csv('/data301/data/okcupid/profiles.csv')
+display(okcupid.head())
+
+words = (
+    okcupid["essay0"].
+    str.lower().
+    str.replace("[^\w\s]", "")).str.replace("\n","")
+
+X_train = pd.DataFrame({"essay0": words})
+X_train.loc[:,"essay0"] = X_train.loc[:,"essay0"].fillna("")
+
+y_train = okcupid["pets"].fillna("No response")
+
+pipe = Pipeline([
+    ('vec',CountVectorizer()),
+    ('model', KNeighborsClassifier())
+])
+
+## GRID SEARCH
+
+k_OPTIONS = [3, 10, 25, 50]
+param_grid = {
+    'model__n_neighbors': k_OPTIONS
+}
+
+grid = GridSearchCV(pipe, cv=5, n_jobs=1, param_grid=param_grid,scoring='f1_micro')
+
+# define the training data
+# easily increased if this container could handle larger sizes
+grid.fit(X_train.head(10000)["essay0"], y_train.head(10000))
+
+results = pd.DataFrame(grid.cv_results_['params'])
+mean_scores = np.array(grid.cv_results_['mean_test_score'])
+results.loc[:,"mean_test_score"] = mean_scores
+
+results.groupby("model__n_neighbors").mean().plot.bar()
+# END SOLUTION
+
+
+# -
 
 
